@@ -14,7 +14,13 @@ const FeaturedBoats = () => {
   useEffect(() => {
     // Simulate API loading delay
     const timer = setTimeout(() => {
-      setFeaturedBoats(getFeaturedBoats());
+      const boats = getFeaturedBoats();
+      // Convert prices from dollars to rupees (example conversion)
+      const convertedBoats = boats.map(boat => ({
+        ...boat,
+        price: boat.price * 83 // Approximate USD to INR conversion
+      }));
+      setFeaturedBoats(convertedBoats);
       setIsLoading(false);
     }, 500);
 
@@ -58,7 +64,7 @@ const FeaturedBoats = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredBoats.map((boat) => (
-              <BoatCard key={boat.id} boat={boat} />
+              <BoatCard key={boat.id} boat={boat} currencySymbol="₹" />
             ))}
           </div>
         )}

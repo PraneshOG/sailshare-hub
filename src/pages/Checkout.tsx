@@ -8,6 +8,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Calendar, Clock, Users, QrCode } from 'lucide-react';
 import QRCodeGenerator from '@/components/checkout/QRCodeGenerator';
+import GuestDetailsForm from '@/components/checkout/GuestDetailsForm';
+import { useToast } from '@/components/ui/use-toast';
+
+interface GuestDetail {
+  name: string;
+  age: string;
+  idType: string;
+  idNumber: string;
+  photoUploaded: boolean;
+}
 
 interface BookingDetails {
   boatId: string;
@@ -24,6 +34,7 @@ interface BookingDetails {
 const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
   const [formData, setFormData] = useState({
     fullName: '',
@@ -31,8 +42,10 @@ const Checkout = () => {
     phone: '',
     specialRequests: ''
   });
+  const [guestDetails, setGuestDetails] = useState<GuestDetail[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
   const [ticketId, setTicketId] = useState('');
+  const [currentStep, setCurrentStep] = useState(1);
 
   useEffect(() => {
     if (location.state) {
@@ -47,8 +60,38 @@ const Checkout = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleGuestDetailsChange = (details: GuestDetail[]) => {
+    setGuestDetails(details);
+  };
+
+  const handleSubmitStep1 = (e: React.FormEvent) => {
     e.preventDefault();
+    setCurrentStep(2);
+    window.scrollTo(0, 0);
+  };
+
+  const handleSubmitStep2 = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate all guests have required details
+    if (!bookingDetails) return;
+    
+    const allGuestsValid = guestDetails.length === bookingDetails.guestCount &&
+      guestDetails.every(guest => 
+        guest.name.trim() !== '' && 
+        guest.age.trim() !== '' && 
+        guest.idNumber.trim() !== '' &&
+        guest.photoUploaded
+      );
+    
+    if (!allGuestsValid) {
+      toast({
+        title: "Missing information",
+        description: "Please complete all guest details including photo verification.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     // Simulate booking process
     setTimeout(() => {
@@ -56,6 +99,7 @@ const Checkout = () => {
       const randomTicketId = 'SB-' + Math.floor(100000 + Math.random() * 900000);
       setTicketId(randomTicketId);
       setIsCompleted(true);
+      window.scrollTo(0, 0);
     }, 1500);
   };
 
@@ -97,83 +141,119 @@ const Checkout = () => {
             <>
               <div className="mb-6">
                 <button 
-                  onClick={() => navigate(-1)} 
+                  onClick={() => currentStep === 1 ? navigate(-1) : setCurrentStep(1)} 
                   className="inline-flex items-center gap-1 text-gray-500 hover:text-ocean-600 transition-colors"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  <span>Back</span>
+                  <span>{currentStep === 1 ? 'Back' : 'Back to Personal Details'}</span>
                 </button>
                 <h1 className="text-3xl font-bold text-gray-900 mt-2">Complete Your Booking</h1>
-                <p className="text-gray-600">Enter your details to confirm your reservation</p>
+                <p className="text-gray-600">
+                  {currentStep === 1 
+                    ? 'Enter your details to start your reservation' 
+                    : 'Enter guest details and upload verification documents'}
+                </p>
+                
+                {/* Progress Steps */}
+                <div className="flex items-center mt-6">
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full ${currentStep === 1 ? 'bg-ocean-600 text-white' : 'bg-ocean-600 text-white'}`}>
+                    1
+                  </div>
+                  <div className={`flex-1 h-1 mx-2 ${currentStep === 1 ? 'bg-gray-200' : 'bg-ocean-600'}`}></div>
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full ${currentStep === 1 ? 'bg-gray-200 text-gray-600' : 'bg-ocean-600 text-white'}`}>
+                    2
+                  </div>
+                </div>
               </div>
               
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Booking Form */}
                 <div className="lg:col-span-2">
-                  <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-6">Contact Information</h2>
-                    
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {currentStep === 1 ? (
+                    <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+                      <h2 className="text-xl font-semibold text-gray-900 mb-6">Personal Information</h2>
+                      
+                      <form onSubmit={handleSubmitStep1} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label htmlFor="fullName">Full Name</Label>
+                            <Input 
+                              id="fullName"
+                              name="fullName"
+                              value={formData.fullName}
+                              onChange={handleInputChange}
+                              placeholder="Enter your full name"
+                              required
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="email">Email Address</Label>
+                            <Input 
+                              id="email"
+                              name="email"
+                              type="email"
+                              value={formData.email}
+                              onChange={handleInputChange}
+                              placeholder="Your email address"
+                              required
+                            />
+                          </div>
+                        </div>
+                        
                         <div className="space-y-2">
-                          <Label htmlFor="fullName">Full Name</Label>
+                          <Label htmlFor="phone">Phone Number</Label>
                           <Input 
-                            id="fullName"
-                            name="fullName"
-                            value={formData.fullName}
+                            id="phone"
+                            name="phone"
+                            type="tel"
+                            value={formData.phone}
                             onChange={handleInputChange}
-                            placeholder="Enter your full name"
+                            placeholder="Contact phone number"
                             required
                           />
                         </div>
                         
                         <div className="space-y-2">
-                          <Label htmlFor="email">Email Address</Label>
-                          <Input 
-                            id="email"
-                            name="email"
-                            type="email"
-                            value={formData.email}
+                          <Label htmlFor="specialRequests">Special Requests (Optional)</Label>
+                          <textarea 
+                            id="specialRequests"
+                            name="specialRequests"
+                            value={formData.specialRequests}
                             onChange={handleInputChange}
-                            placeholder="Your email address"
-                            required
+                            placeholder="Any special requirements or notes for your booking"
+                            className="w-full min-h-[100px] p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-ocean-500/50 focus:border-transparent focus:outline-none transition-all"
                           />
                         </div>
-                      </div>
+                        
+                        <Button 
+                          type="submit"
+                          className="w-full bg-ocean-600 hover:bg-ocean-700 text-white font-medium py-3 rounded-lg transition-all"
+                        >
+                          Continue to Guest Details
+                        </Button>
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+                      <h2 className="text-xl font-semibold text-gray-900 mb-6">Guest Information</h2>
                       
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Phone Number</Label>
-                        <Input 
-                          id="phone"
-                          name="phone"
-                          type="tel"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          placeholder="Contact phone number"
-                          required
+                      <form onSubmit={handleSubmitStep2} className="space-y-6">
+                        <GuestDetailsForm 
+                          guestCount={bookingDetails.guestCount} 
+                          onGuestDetailsChange={handleGuestDetailsChange}
                         />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="specialRequests">Special Requests (Optional)</Label>
-                        <textarea 
-                          id="specialRequests"
-                          name="specialRequests"
-                          value={formData.specialRequests}
-                          onChange={handleInputChange}
-                          placeholder="Any special requirements or notes for your booking"
-                          className="w-full min-h-[100px] p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-ocean-500/50 focus:border-transparent focus:outline-none transition-all"
-                        />
-                      </div>
-                      
-                      <Button 
-                        type="submit"
-                        className="w-full bg-ocean-600 hover:bg-ocean-700 text-white font-medium py-3 rounded-lg transition-all"
-                      >
-                        Complete Booking
-                      </Button>
-                    </form>
-                  </div>
+                        
+                        <Button 
+                          type="submit"
+                          className="w-full bg-ocean-600 hover:bg-ocean-700 text-white font-medium py-3 rounded-lg transition-all"
+                          disabled={guestDetails.length !== bookingDetails.guestCount}
+                        >
+                          Complete Booking
+                        </Button>
+                      </form>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Booking Summary */}
@@ -208,20 +288,20 @@ const Checkout = () => {
                     
                     <div className="border-t border-gray-100 pt-4">
                       <div className="flex justify-between mb-2">
-                        <span className="text-gray-600">₹{bookingDetails.price} × {bookingDetails.duration} hours</span>
-                        <span className="font-medium">₹{bookingDetails.price * bookingDetails.duration}</span>
+                        <span className="text-gray-600">₹{bookingDetails.price.toLocaleString('en-IN')} × {bookingDetails.duration} hours</span>
+                        <span className="font-medium">₹{(bookingDetails.price * bookingDetails.duration).toLocaleString('en-IN')}</span>
                       </div>
                       <div className="flex justify-between mb-2">
                         <span className="text-gray-600">Cleaning fee</span>
-                        <span className="font-medium">₹50</span>
+                        <span className="font-medium">₹500</span>
                       </div>
                       <div className="flex justify-between mb-2">
                         <span className="text-gray-600">Service fee</span>
-                        <span className="font-medium">₹30</span>
+                        <span className="font-medium">₹300</span>
                       </div>
                       <div className="flex justify-between font-bold text-lg border-t border-gray-100 pt-3 mt-3">
                         <span>Total</span>
-                        <span>₹{bookingDetails.totalPrice}</span>
+                        <span>₹{bookingDetails.totalPrice.toLocaleString('en-IN')}</span>
                       </div>
                     </div>
                   </div>
@@ -264,7 +344,12 @@ const Checkout = () => {
                         time: bookingDetails.time,
                         guestCount: bookingDetails.guestCount,
                         bookedBy: formData.fullName,
-                        email: formData.email
+                        email: formData.email,
+                        guests: guestDetails.map(g => ({
+                          name: g.name,
+                          age: g.age,
+                          idType: g.idType
+                        }))
                       })}
                     />
                   </div>

@@ -25,6 +25,7 @@ const App = () => (
           <Route path="/boats/:id" element={<BoatDetail />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/list-your-boat" element={<Auth />} /> {/* Redirects to Auth for now */}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
