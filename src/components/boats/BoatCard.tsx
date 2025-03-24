@@ -6,9 +6,10 @@ import { Star, Heart, MapPin, Users, Ruler } from 'lucide-react';
 
 interface BoatCardProps {
   boat: Boat;
+  currencySymbol?: string;
 }
 
-const BoatCard: React.FC<BoatCardProps> = ({ boat }) => {
+const BoatCard: React.FC<BoatCardProps> = ({ boat, currencySymbol = '$' }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -128,7 +129,7 @@ const BoatCard: React.FC<BoatCardProps> = ({ boat }) => {
           <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
             <div>
               <span className="text-sm text-gray-500">Price from</span>
-              <p className="text-lg font-bold text-gray-900">${boat.price}<span className="text-sm font-medium text-gray-500">/hour</span></p>
+              <p className="text-lg font-bold text-gray-900">{currencySymbol}{boat.price}<span className="text-sm font-medium text-gray-500">/hour</span></p>
             </div>
             <div className="bg-ocean-50 text-ocean-600 font-medium rounded-lg py-1 px-3 text-sm">
               View Details
