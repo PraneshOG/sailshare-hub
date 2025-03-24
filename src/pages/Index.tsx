@@ -3,7 +3,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Hero from '@/components/home/Hero';
 import FeaturedBoats from '@/components/home/FeaturedBoats';
-import { Anchor, ShieldCheck, Smile, MessageSquare } from 'lucide-react';
+import { Anchor, ShieldCheck, Smile, MessageSquare, Search, Calendar } from 'lucide-react';
 
 const Index = () => {
   return (

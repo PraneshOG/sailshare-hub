@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, Search, Boat } from 'lucide-react';
+import { Menu, X, User, Search, Ship } from 'lucide-react';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -33,7 +33,7 @@ const Navbar = () => {
           to="/" 
           className="flex items-center gap-2 text-2xl font-bold text-ocean-700 transition-all duration-300"
         >
-          <Boat className="h-8 w-8 text-ocean-600" />
+          <Ship className="h-8 w-8 text-ocean-600" />
           <span className="hidden sm:inline">SailShare</span>
         </Link>
 

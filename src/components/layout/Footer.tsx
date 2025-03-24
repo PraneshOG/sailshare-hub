@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Boat, Mail, Phone } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Ship, Mail, Phone } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -10,7 +10,7 @@ const Footer = () => {
           {/* Brand Column */}
           <div>
             <Link to="/" className="flex items-center gap-2 text-2xl font-bold text-white mb-4">
-              <Boat className="h-8 w-8" />
+              <Ship className="h-8 w-8" />
               <span>SailShare</span>
             </Link>
             <p className="text-gray-300 mb-6">
