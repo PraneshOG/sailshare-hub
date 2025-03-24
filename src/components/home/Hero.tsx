@@ -22,9 +22,6 @@ const Hero = () => {
       {/* Content */}
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl">
-          <span className="inline-block bg-ocean-600/90 backdrop-blur-sm text-white px-4 py-1 rounded-full text-sm font-medium mb-6 animate-fade-in">
-            India's Premier Boat Rental Marketplace
-          </span>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
             Experience India's Waters<br />
             <span className="text-ocean-400">Like Never Before</span>
