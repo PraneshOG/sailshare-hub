@@ -1,14 +1,15 @@
 
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { getBoatById, Boat } from '@/data/boats';
-import { Star, MapPin, Users, Ruler, Calendar, Clock, Heart, ArrowLeft, ChevronLeft, ChevronRight, Anchor, Shield, LifeBuoy } from 'lucide-react';
+import { Star, MapPin, Users, Ruler, Calendar, Clock, Heart, ArrowLeft, ChevronLeft, ChevronRight, Anchor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const BoatDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [boat, setBoat] = useState<Boat | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -41,6 +42,27 @@ const BoatDetailPage = () => {
   const handleNextImage = () => {
     if (!boat) return;
     setActiveImageIndex((prev) => (prev === boat.images.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleCheckout = () => {
+    if (!selectedDate || !startTime) {
+      alert('Please select a date and time to continue');
+      return;
+    }
+    // Navigate to checkout page with booking details
+    navigate('/checkout', { 
+      state: { 
+        boatId: id,
+        boatName: boat?.name,
+        boatImage: boat?.images[0],
+        date: selectedDate,
+        time: startTime,
+        duration,
+        guestCount,
+        price: boat?.price,
+        totalPrice: boat ? (boat.price * duration) + 50 + 30 : 0
+      } 
+    });
   };
   
   if (isLoading) {
@@ -248,68 +270,6 @@ const BoatDetailPage = () => {
                   </div>
                 </div>
               </div>
-              
-              {/* Safety & Requirements */}
-              <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-ocean-600" />
-                  Safety & Requirements
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Safety Equipment</h4>
-                    <ul className="space-y-2 text-gray-600">
-                      <li className="flex items-center gap-2">
-                        <LifeBuoy className="h-4 w-4 text-ocean-500" />
-                        <span>Life jackets for all passengers</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <LifeBuoy className="h-4 w-4 text-ocean-500" />
-                        <span>First aid kit</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <LifeBuoy className="h-4 w-4 text-ocean-500" />
-                        <span>Fire extinguisher</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <LifeBuoy className="h-4 w-4 text-ocean-500" />
-                        <span>Emergency flares</span>
-                      </li>
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Requirements</h4>
-                    <ul className="space-y-2 text-gray-600">
-                      <li className="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-ocean-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>Valid ID required for all passengers</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-ocean-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>Security deposit: ${boat.price * 2}</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-ocean-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>Minimum age: 21 years</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-ocean-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>Boating experience preferred</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
             </div>
             
             {/* Right Column - Booking Card */}
@@ -317,7 +277,7 @@ const BoatDetailPage = () => {
               <div className="bg-white rounded-xl shadow-md p-6 sticky top-24">
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <span className="text-2xl font-bold text-gray-900">${boat.price}</span>
+                    <span className="text-2xl font-bold text-gray-900">₹{boat.price}</span>
                     <span className="text-gray-600">/hour</span>
                   </div>
                   <div className="flex items-center gap-1">
@@ -417,27 +377,27 @@ const BoatDetailPage = () => {
                   {/* Price Calculation */}
                   <div className="border-t border-gray-100 pt-4 mt-4">
                     <div className="flex justify-between mb-2">
-                      <span className="text-gray-600">${boat.price} × {duration} hours</span>
-                      <span className="font-medium">${boat.price * duration}</span>
+                      <span className="text-gray-600">₹{boat.price} × {duration} hours</span>
+                      <span className="font-medium">₹{boat.price * duration}</span>
                     </div>
                     <div className="flex justify-between mb-2">
                       <span className="text-gray-600">Cleaning fee</span>
-                      <span className="font-medium">$50</span>
+                      <span className="font-medium">₹50</span>
                     </div>
                     <div className="flex justify-between mb-2">
                       <span className="text-gray-600">Service fee</span>
-                      <span className="font-medium">$30</span>
+                      <span className="font-medium">₹30</span>
                     </div>
                     <div className="flex justify-between font-bold text-lg border-t border-gray-100 pt-3 mt-3">
                       <span>Total</span>
-                      <span>${totalPrice + 50 + 30}</span>
+                      <span>₹{totalPrice + 50 + 30}</span>
                     </div>
                   </div>
                   
                   <Button 
                     type="button"
                     className="w-full bg-ocean-600 hover:bg-ocean-700 text-white font-medium py-3 rounded-lg transition-all"
-                    onClick={() => alert('Proceeding to checkout would be the next step')}
+                    onClick={handleCheckout}
                   >
                     Continue to Book
                   </Button>

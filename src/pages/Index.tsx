@@ -17,54 +17,6 @@ const Index = () => {
         {/* Featured Boats Section */}
         <FeaturedBoats />
         
-        {/* How It Works Section */}
-        <section className="py-20 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <span className="text-ocean-600 text-sm font-semibold tracking-wider uppercase">Simple Process</span>
-              <h2 className="text-3xl font-bold text-gray-900 mt-2">How SailShare Works</h2>
-              <p className="text-gray-600 mt-4">
-                Booking your perfect boat experience has never been easier. Our streamlined process ensures you're on the water in no time.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Step 1 */}
-              <div className="bg-white rounded-xl p-6 text-center shadow-sm">
-                <div className="bg-ocean-50 text-ocean-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Search className="h-6 w-6" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Find Your Boat</h3>
-                <p className="text-gray-600">
-                  Browse our selection of premium boats and filter by location, type, price, and more to find your perfect match.
-                </p>
-              </div>
-              
-              {/* Step 2 */}
-              <div className="bg-white rounded-xl p-6 text-center shadow-sm">
-                <div className="bg-ocean-50 text-ocean-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Calendar className="h-6 w-6" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Book Your Trip</h3>
-                <p className="text-gray-600">
-                  Select your dates, add guests, and complete the secure booking process with our easy-to-use platform.
-                </p>
-              </div>
-              
-              {/* Step 3 */}
-              <div className="bg-white rounded-xl p-6 text-center shadow-sm">
-                <div className="bg-ocean-50 text-ocean-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Anchor className="h-6 w-6" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Enjoy the Water</h3>
-                <p className="text-gray-600">
-                  Meet your boat owner, get on board, and create unforgettable memories on the water with friends and family.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-        
         {/* Trust & Safety Section */}
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4">

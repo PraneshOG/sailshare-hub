@@ -6,7 +6,7 @@ const Footer = () => {
   return (
     <footer className="bg-navy-900 text-white pt-16 pb-8">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Brand Column */}
           <div>
             <Link to="/" className="flex items-center gap-2 text-2xl font-bold text-white mb-4">
@@ -51,45 +51,8 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/how-it-works" className="text-gray-300 hover:text-white transition-colors">
-                  How It Works
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="text-gray-300 hover:text-white transition-colors">
-                  About Us
-                </Link>
-              </li>
-              <li>
                 <Link to="/list-your-boat" className="text-gray-300 hover:text-white transition-colors">
                   List Your Boat
-                </Link>
-              </li>
-            </ul>
-          </div>
-          
-          {/* Support */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-white">Support</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link to="/help" className="text-gray-300 hover:text-white transition-colors">
-                  Help Center
-                </Link>
-              </li>
-              <li>
-                <Link to="/safety" className="text-gray-300 hover:text-white transition-colors">
-                  Safety Guidelines
-                </Link>
-              </li>
-              <li>
-                <Link to="/terms" className="text-gray-300 hover:text-white transition-colors">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link to="/privacy" className="text-gray-300 hover:text-white transition-colors">
-                  Privacy Policy
                 </Link>
               </li>
             </ul>
@@ -105,7 +68,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-2 text-gray-300">
                 <Phone className="h-5 w-5 text-ocean-400" />
-                <span>+1 (800) 555-SAIL</span>
+                <span>+91 (800) 555-SAIL</span>
               </li>
             </ul>
             <div className="mt-6">

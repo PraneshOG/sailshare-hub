@@ -45,18 +45,6 @@ const Navbar = () => {
           >
             Find Boats
           </Link>
-          <Link 
-            to="/how-it-works" 
-            className="text-gray-700 hover:text-ocean-600 transition-colors font-medium"
-          >
-            How It Works
-          </Link>
-          <Link 
-            to="/about" 
-            className="text-gray-700 hover:text-ocean-600 transition-colors font-medium"
-          >
-            About Us
-          </Link>
         </div>
 
         {/* Desktop Actions */}
@@ -100,18 +88,6 @@ const Navbar = () => {
               className="text-gray-700 hover:text-ocean-600 py-2 border-b border-gray-100"
             >
               Find Boats
-            </Link>
-            <Link 
-              to="/how-it-works" 
-              className="text-gray-700 hover:text-ocean-600 py-2 border-b border-gray-100"
-            >
-              How It Works
-            </Link>
-            <Link 
-              to="/about" 
-              className="text-gray-700 hover:text-ocean-600 py-2 border-b border-gray-100"
-            >
-              About Us
             </Link>
             <div className="flex items-center justify-between pt-2 gap-4">
               <Button variant="outline" className="w-1/2 rounded-full">
