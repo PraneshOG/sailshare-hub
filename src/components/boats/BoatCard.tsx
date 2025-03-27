@@ -99,7 +99,7 @@ const BoatCard: React.FC<BoatCardProps> = ({ boat, currencySymbol = '฿' }) => 
           </button>
         </div>
         
-        {/* Content */}
+        {/* Content - Simplified */}
         <div className="p-4 text-white">
           <div className="flex justify-between items-start">
             <h3 className="text-lg font-semibold text-white">{boat.name}</h3>
