@@ -25,23 +25,23 @@ const Navbar = () => {
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
-        isScrolled ? 'bg-white/90 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-5'
+        isScrolled ? 'bg-indigo-900/90 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-5'
       }`}
     >
       <nav className="container mx-auto px-4 flex items-center justify-between">
         <Link 
           to="/" 
-          className="flex items-center gap-2 text-2xl font-bold text-ocean-700 transition-all duration-300"
+          className="flex items-center gap-2 text-2xl font-bold text-white transition-all duration-300"
         >
-          <Ship className="h-8 w-8 text-ocean-600" />
-          <span className="hidden sm:inline">SailShare</span>
+          <Ship className="h-8 w-8 text-orange-500" />
+          <span className="hidden sm:inline gradient-text bg-gradient-to-r from-red-500 to-orange-500 text-transparent bg-clip-text">SailShare</span>
         </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
           <Link 
             to="/boats" 
-            className="text-gray-700 hover:text-ocean-600 transition-colors font-medium"
+            className="text-white hover:text-orange-400 transition-colors font-medium"
           >
             Find Boats
           </Link>
@@ -49,25 +49,21 @@ const Navbar = () => {
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-4">
-          <Button variant="outline" size="sm" className="rounded-full">
-            <Search className="h-4 w-4 mr-2" />
-            Search
-          </Button>
           <Link to="/auth">
             <Button 
               variant="default" 
               size="sm" 
-              className="rounded-full bg-ocean-600 hover:bg-ocean-700"
+              className="rounded-full bg-red-500 hover:bg-red-600"
             >
               <User className="h-4 w-4 mr-2" />
-              Sign In
+              Sign in
             </Button>
           </Link>
         </div>
 
         {/* Mobile Menu Button */}
         <button 
-          className="md:hidden text-gray-700 p-2"
+          className="md:hidden text-white p-2"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           aria-label="Toggle menu"
         >
@@ -81,26 +77,22 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 animate-fade-in-up">
+        <div className="md:hidden bg-indigo-900 border-t border-indigo-800 animate-fade-in-up">
           <div className="container mx-auto py-4 px-4 flex flex-col gap-4">
             <Link 
               to="/boats" 
-              className="text-gray-700 hover:text-ocean-600 py-2 border-b border-gray-100"
+              className="text-white hover:text-orange-400 py-2 border-b border-indigo-800"
             >
               Find Boats
             </Link>
             <div className="flex items-center justify-between pt-2 gap-4">
-              <Button variant="outline" className="w-1/2 rounded-full">
-                <Search className="h-4 w-4 mr-2" />
-                Search
-              </Button>
-              <Link to="/auth" className="w-1/2">
+              <Link to="/auth" className="w-full">
                 <Button 
                   variant="default" 
-                  className="w-full rounded-full bg-ocean-600 hover:bg-ocean-700"
+                  className="w-full rounded-full bg-red-500 hover:bg-red-600"
                 >
                   <User className="h-4 w-4 mr-2" />
-                  Sign In
+                  Sign in
                 </Button>
               </Link>
             </div>

@@ -15,10 +15,10 @@ const FeaturedBoats = () => {
     // Simulate API loading delay
     const timer = setTimeout(() => {
       const boats = getFeaturedBoats();
-      // Convert prices from dollars to rupees (example conversion)
+      // Convert prices to Thai Baht (example conversion)
       const convertedBoats = boats.map(boat => ({
         ...boat,
-        price: boat.price * 83 // Approximate USD to INR conversion
+        price: boat.price * 35 // Approximate USD to THB conversion
       }));
       setFeaturedBoats(convertedBoats);
       setIsLoading(false);
@@ -32,8 +32,8 @@ const FeaturedBoats = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-10">
           <div>
-            <span className="text-ocean-600 text-sm font-semibold tracking-wider uppercase">Featured</span>
-            <h2 className="text-3xl font-bold text-gray-900 mt-1">Discover Premium Boats</h2>
+            <span className="text-red-500 text-sm font-semibold tracking-wider uppercase">Featured</span>
+            <h2 className="text-3xl font-bold text-gray-900 mt-1">Discover Premium Boats in Phuket</h2>
           </div>
           <div className="hidden sm:flex items-center gap-2">
             <Button
@@ -64,7 +64,7 @@ const FeaturedBoats = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredBoats.map((boat) => (
-              <BoatCard key={boat.id} boat={boat} currencySymbol="₹" />
+              <BoatCard key={boat.id} boat={boat} currencySymbol="฿" />
             ))}
           </div>
         )}
@@ -72,7 +72,7 @@ const FeaturedBoats = () => {
         <div className="mt-12 text-center">
           <Link to="/boats">
             <Button 
-              className="bg-ocean-600 hover:bg-ocean-700 text-white font-medium py-2 px-6 rounded-lg transition-all inline-flex items-center gap-2"
+              className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg transition-all inline-flex items-center gap-2"
             >
               View All Boats
               <ChevronRight className="h-4 w-4" />
