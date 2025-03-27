@@ -1,4 +1,3 @@
-
 export interface Boat {
   id: string;
   name: string;
@@ -26,7 +25,7 @@ export const boats: Boat[] = [
     id: "boat-01",
     name: "Azure Dream",
     type: "Motor Yacht",
-    location: "Miami, FL",
+    location: "Patong Beach, Phuket",
     price: 250,
     capacity: 8,
     length: 42,
@@ -51,7 +50,7 @@ export const boats: Boat[] = [
     id: "boat-02",
     name: "Ocean Voyager",
     type: "Sailing Yacht",
-    location: "San Diego, CA",
+    location: "Chalong Bay, Phuket",
     price: 180,
     capacity: 6,
     length: 38,
@@ -61,7 +60,7 @@ export const boats: Boat[] = [
     images: [
       "https://images.unsplash.com/photo-1605281317010-fe5ffe798166?q=80&w=2048&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1561531051-412ffce1f6af?q=80&w=1972&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1605281317010-fe5ffe798166?q=80&w=2048&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1543777167-1e8a0e9ae1ec?q=80&w=2070&auto=format&fit=crop"
     ],
     rating: 4.7,
     reviewCount: 19,
@@ -76,7 +75,7 @@ export const boats: Boat[] = [
     id: "boat-03",
     name: "Coastal Explorer",
     type: "Catamaran",
-    location: "Key West, FL",
+    location: "Kata Beach, Phuket",
     price: 320,
     capacity: 12,
     length: 45,
@@ -101,7 +100,7 @@ export const boats: Boat[] = [
     id: "boat-04",
     name: "Harbor Cruiser",
     type: "Pontoon Boat",
-    location: "Chicago, IL",
+    location: "Kamala Beach, Phuket",
     price: 120,
     capacity: 10,
     length: 24,
@@ -111,7 +110,7 @@ export const boats: Boat[] = [
     images: [
       "https://images.unsplash.com/photo-1550909051-ea1d7cc14a48?q=80&w=1974&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1636455780323-3bec13c08db2?q=80&w=2074&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1609436132311-e4b0c9302506?q=80&w=1974&auto=format&fit=crop"
     ],
     rating: 4.6,
     reviewCount: 23,
@@ -125,7 +124,7 @@ export const boats: Boat[] = [
     id: "boat-05",
     name: "Wave Rider",
     type: "Speedboat",
-    location: "Miami, FL",
+    location: "Rawai Beach, Phuket",
     price: 200,
     capacity: 6,
     length: 26,
@@ -149,7 +148,7 @@ export const boats: Boat[] = [
     id: "boat-06",
     name: "Sunset Serenity",
     type: "Bowrider",
-    location: "Tampa, FL",
+    location: "Karon Beach, Phuket",
     price: 150,
     capacity: 8,
     length: 28,
@@ -159,7 +158,7 @@ export const boats: Boat[] = [
     images: [
       "https://images.unsplash.com/photo-1630395822970-acd6a691d97e?q=80&w=1974&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1534184241306-2d5103231bad?q=80&w=1974&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1622633721992-80f785d4a00c?q=80&w=1942&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1493894473891-10fc1e5dbd22?q=80&w=2069&auto=format&fit=crop"
     ],
     rating: 4.5,
     reviewCount: 21,

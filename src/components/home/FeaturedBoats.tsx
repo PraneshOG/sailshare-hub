@@ -28,7 +28,7 @@ const FeaturedBoats = () => {
   }, []);
 
   return (
-    <section id="featured-boats" className="py-20 bg-gradient-to-b from-purple-900 to-indigo-900 text-white">
+    <section id="featured-boats" className="py-20 bg-gradient-to-b from-indigo-900 to-purple-900 text-white">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-10">
           <div>
@@ -39,7 +39,7 @@ const FeaturedBoats = () => {
             <Button
               variant="outline"
               size="icon"
-              className="rounded-full bg-purple-800 border-purple-700 text-white hover:bg-purple-700"
+              className="rounded-full bg-blue-600 border-blue-500 text-white hover:bg-blue-700"
               aria-label="Previous"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -47,7 +47,7 @@ const FeaturedBoats = () => {
             <Button
               variant="outline"
               size="icon"
-              className="rounded-full bg-purple-800 border-purple-700 text-white hover:bg-purple-700"
+              className="rounded-full bg-blue-600 border-blue-500 text-white hover:bg-blue-700"
               aria-label="Next"
             >
               <ChevronRight className="h-5 w-5" />
@@ -58,7 +58,7 @@ const FeaturedBoats = () => {
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(3)].map((_, index) => (
-              <div key={index} className="bg-purple-800/40 rounded-xl p-4 h-80 animate-pulse"></div>
+              <div key={index} className="bg-indigo-800/40 rounded-xl p-4 h-80 animate-pulse"></div>
             ))}
           </div>
         ) : (

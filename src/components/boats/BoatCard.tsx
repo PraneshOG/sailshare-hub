@@ -2,14 +2,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Boat } from '@/data/boats';
-import { Star, Heart, MapPin, Users, Ruler } from 'lucide-react';
+import { Star, Heart, MapPin } from 'lucide-react';
 
 interface BoatCardProps {
   boat: Boat;
   currencySymbol?: string;
 }
 
-const BoatCard: React.FC<BoatCardProps> = ({ boat, currencySymbol = '$' }) => {
+const BoatCard: React.FC<BoatCardProps> = ({ boat, currencySymbol = '฿' }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -33,7 +33,7 @@ const BoatCard: React.FC<BoatCardProps> = ({ boat, currencySymbol = '$' }) => {
 
   return (
     <Link to={`/boats/${boat.id}`} className="block">
-      <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 h-full card-hover">
+      <div className="bg-indigo-900/70 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 h-full card-hover border border-purple-700/30">
         {/* Image with controls */}
         <div className="relative h-56">
           <img 
@@ -85,7 +85,7 @@ const BoatCard: React.FC<BoatCardProps> = ({ boat, currencySymbol = '$' }) => {
           )}
           
           {/* Type Label */}
-          <div className="absolute top-3 left-3 bg-white/70 backdrop-blur-sm rounded-full py-1 px-3 text-xs font-medium">
+          <div className="absolute top-3 left-3 bg-blue-500/80 backdrop-blur-sm rounded-full py-1 px-3 text-xs font-medium text-white">
             {boat.type}
           </div>
           
@@ -100,38 +100,26 @@ const BoatCard: React.FC<BoatCardProps> = ({ boat, currencySymbol = '$' }) => {
         </div>
         
         {/* Content */}
-        <div className="p-4">
+        <div className="p-4 text-white">
           <div className="flex justify-between items-start">
-            <h3 className="text-lg font-semibold text-gray-900">{boat.name}</h3>
+            <h3 className="text-lg font-semibold text-white">{boat.name}</h3>
             <div className="flex items-center gap-1 text-sm">
-              <Star className="h-4 w-4 text-yellow-500 fill-current" />
+              <Star className="h-4 w-4 text-yellow-400 fill-current" />
               <span className="font-medium">{boat.rating}</span>
-              <span className="text-gray-500">({boat.reviewCount})</span>
             </div>
           </div>
           
-          <div className="flex items-center gap-1 mt-2 text-gray-500 text-sm">
+          <div className="flex items-center gap-1 mt-2 text-blue-200 text-sm">
             <MapPin className="h-3.5 w-3.5" />
             <span>{boat.location}</span>
           </div>
           
-          <div className="grid grid-cols-2 gap-2 mt-3">
-            <div className="flex items-center gap-1.5 text-sm text-gray-600">
-              <Users className="h-4 w-4 text-ocean-500" />
-              <span>{boat.capacity} guests</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-sm text-gray-600">
-              <Ruler className="h-4 w-4 text-ocean-500" />
-              <span>{boat.length}ft length</span>
-            </div>
-          </div>
-          
-          <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+          <div className="mt-4 pt-4 border-t border-purple-700/30 flex justify-between items-center">
             <div>
-              <span className="text-sm text-gray-500">Price from</span>
-              <p className="text-lg font-bold text-gray-900">{currencySymbol}{boat.price}<span className="text-sm font-medium text-gray-500">/hour</span></p>
+              <span className="text-sm text-blue-200">Price from</span>
+              <p className="text-lg font-bold text-white">{currencySymbol}{boat.price}<span className="text-sm font-medium text-blue-200">/hour</span></p>
             </div>
-            <div className="bg-ocean-50 text-ocean-600 font-medium rounded-lg py-1 px-3 text-sm">
+            <div className="bg-orange-500 text-white font-medium rounded-lg py-1 px-3 text-sm hover:bg-orange-600 transition-colors">
               View Details
             </div>
           </div>
