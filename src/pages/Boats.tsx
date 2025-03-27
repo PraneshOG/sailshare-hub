@@ -17,9 +17,8 @@ const BoatsPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   
   // Filter states
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 20000]);
   const [selectedBoatTypes, setSelectedBoatTypes] = useState<string[]>([]);
-  const [selectedCapacity, setSelectedCapacity] = useState<number | null>(null);
   
   useEffect(() => {
     // Parse query parameters
@@ -32,8 +31,19 @@ const BoatsPage = () => {
     // Simulate API loading delay
     const timer = setTimeout(() => {
       const allBoats = getAllBoats();
-      setBoats(allBoats);
-      setFilteredBoats(allBoats);
+      // Convert prices to Thai Baht and ensure all boats have at least 3 images
+      const convertedBoats = allBoats.map(boat => ({
+        ...boat,
+        price: boat.price * 35, // Approximate USD to THB conversion
+        // Ensure all boats have at least 3 images with different images
+        images: boat.images.length >= 3 ? boat.images : [
+          "https://images.unsplash.com/photo-1540946485063-a40da27545f8?q=80&w=2070&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1605281317010-fe5ffe798166?q=80&w=2048&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop"
+        ]
+      }));
+      setBoats(convertedBoats);
+      setFilteredBoats(convertedBoats);
       setIsLoading(false);
     }, 800);
 
@@ -64,29 +74,24 @@ const BoatsPage = () => {
       if (selectedBoatTypes.length > 0) {
         results = results.filter(boat => selectedBoatTypes.includes(boat.type));
       }
-      
-      // Apply capacity filter
-      if (selectedCapacity) {
-        results = results.filter(boat => boat.capacity >= selectedCapacity);
-      }
-      
+            
       setFilteredBoats(results);
     }
-  }, [searchTerm, boats, priceRange, selectedBoatTypes, selectedCapacity]);
+  }, [searchTerm, boats, priceRange, selectedBoatTypes]);
   
   // Get unique boat types for filter
   const boatTypes = [...new Set(boats.map(boat => boat.type))];
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-indigo-900 to-purple-900 text-white">
       <Navbar />
       
       <main className="flex-grow pt-24 pb-20">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Find Your Perfect Boat</h1>
-              <p className="text-gray-600 mt-2">
+              <h1 className="text-3xl font-bold text-white">Find Your Perfect Boat</h1>
+              <p className="text-blue-200 mt-2">
                 {filteredBoats.length} boat{filteredBoats.length !== 1 ? 's' : ''} available
                 {searchTerm ? ` in "${searchTerm}"` : ''}
               </p>
@@ -95,7 +100,7 @@ const BoatsPage = () => {
             <Button 
               onClick={() => setShowFilters(!showFilters)}
               variant="outline"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 border-blue-400 text-white"
             >
               <Sliders className="h-4 w-4" />
               Filters
@@ -110,7 +115,7 @@ const BoatsPage = () => {
               </div>
               <input 
                 type="text" 
-                className="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-ocean-500/50 focus:border-transparent transition-all"
+                className="w-full pl-10 pr-3 py-3 bg-indigo-800/40 border border-purple-700/30 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all text-white placeholder:text-blue-200/70"
                 placeholder="Search by location, boat type, or name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -119,20 +124,20 @@ const BoatsPage = () => {
             
             {/* Filters Section - Expandable */}
             {showFilters && (
-              <div className="bg-white shadow-md rounded-lg p-6 mt-4 animate-fade-in">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
+              <div className="bg-indigo-800/60 shadow-md rounded-lg p-6 mt-4 animate-fade-in border border-purple-700/30">
+                <h3 className="text-lg font-semibold text-white mb-4">Filters</h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Price Range */}
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Price Range (per hour)</h4>
+                    <h4 className="text-sm font-medium text-white mb-2">Price Range (per hour)</h4>
                     <div className="flex items-center gap-4">
                       <input 
                         type="number" 
                         min="0"
                         value={priceRange[0]}
                         onChange={(e) => setPriceRange([parseInt(e.target.value), priceRange[1]])}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-ocean-500/50 focus:border-transparent"
+                        className="w-full px-3 py-2 bg-indigo-700/50 border border-purple-700/50 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-transparent text-white"
                       />
                       <span>to</span>
                       <input 
@@ -140,20 +145,20 @@ const BoatsPage = () => {
                         min={priceRange[0]}
                         value={priceRange[1]}
                         onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-ocean-500/50 focus:border-transparent"
+                        className="w-full px-3 py-2 bg-indigo-700/50 border border-purple-700/50 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-transparent text-white"
                       />
                     </div>
                   </div>
                   
                   {/* Boat Type */}
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Boat Type</h4>
+                    <h4 className="text-sm font-medium text-white mb-2">Boat Type</h4>
                     <div className="grid grid-cols-2 gap-2">
                       {boatTypes.map(type => (
                         <label key={type} className="inline-flex items-center">
                           <input 
                             type="checkbox"
-                            className="rounded text-ocean-600 focus:ring-ocean-500"
+                            className="rounded text-blue-600 focus:ring-blue-500 bg-indigo-700/50 border-purple-700/50"
                             checked={selectedBoatTypes.includes(type)}
                             onChange={(e) => {
                               if (e.target.checked) {
@@ -163,38 +168,21 @@ const BoatsPage = () => {
                               }
                             }}
                           />
-                          <span className="ml-2 text-sm text-gray-700">{type}</span>
+                          <span className="ml-2 text-sm text-white">{type}</span>
                         </label>
                       ))}
                     </div>
-                  </div>
-                  
-                  {/* Capacity */}
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Guest Capacity</h4>
-                    <select 
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-ocean-500/50 focus:border-transparent"
-                      value={selectedCapacity || ''}
-                      onChange={(e) => setSelectedCapacity(e.target.value ? parseInt(e.target.value) : null)}
-                    >
-                      <option value="">Any capacity</option>
-                      <option value="2">2+ guests</option>
-                      <option value="4">4+ guests</option>
-                      <option value="6">6+ guests</option>
-                      <option value="8">8+ guests</option>
-                      <option value="10">10+ guests</option>
-                    </select>
                   </div>
                 </div>
                 
                 <div className="mt-6 flex justify-end gap-3">
                   <Button 
                     variant="outline"
+                    className="border-blue-400 text-white"
                     onClick={() => {
                       // Reset filters
-                      setPriceRange([0, 500]);
+                      setPriceRange([0, 20000]);
                       setSelectedBoatTypes([]);
-                      setSelectedCapacity(null);
                       setSearchTerm('');
                     }}
                   >
@@ -202,7 +190,7 @@ const BoatsPage = () => {
                   </Button>
                   <Button 
                     variant="default"
-                    className="bg-ocean-600 hover:bg-ocean-700"
+                    className="bg-red-500 hover:bg-red-600"
                     onClick={() => setShowFilters(false)}
                   >
                     Apply Filters
@@ -216,7 +204,7 @@ const BoatsPage = () => {
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {[...Array(6)].map((_, index) => (
-                <div key={index} className="bg-gray-100 rounded-xl p-4 h-80 animate-pulse"></div>
+                <div key={index} className="bg-indigo-800/40 rounded-xl p-4 h-80 animate-pulse"></div>
               ))}
             </div>
           ) : filteredBoats.length > 0 ? (
@@ -226,10 +214,10 @@ const BoatsPage = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 bg-gray-50 rounded-xl">
-              <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No boats found</h3>
-              <p className="text-gray-600 max-w-md mx-auto">
+            <div className="text-center py-16 bg-indigo-800/30 rounded-xl border border-purple-700/30">
+              <AlertCircle className="h-12 w-12 text-blue-200 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">No boats found</h3>
+              <p className="text-blue-200 max-w-md mx-auto">
                 We couldn't find any boats matching your search criteria. Try adjusting your filters or search terms.
               </p>
             </div>

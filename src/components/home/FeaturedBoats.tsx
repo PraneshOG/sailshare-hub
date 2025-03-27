@@ -19,11 +19,11 @@ const FeaturedBoats = () => {
       const convertedBoats = boats.map(boat => ({
         ...boat,
         price: boat.price * 35, // Approximate USD to THB conversion
-        // Ensure all boats have at least 3 images
+        // Ensure all boats have at least 3 images with different images
         images: boat.images.length >= 3 ? boat.images : [
-          "https://images.unsplash.com/photo-1566438480900-0609be27a4be?q=80&w=1994&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1540946485063-a40da27545f8?q=80&w=2070&auto=format&fit=crop",
           "https://images.unsplash.com/photo-1605281317010-fe5ffe798166?q=80&w=2048&auto=format&fit=crop",
-          "https://images.unsplash.com/photo-1601671086461-18e87b2c1c60?q=80&w=1974&auto=format&fit=crop"
+          "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop"
         ]
       }));
       setFeaturedBoats(convertedBoats);

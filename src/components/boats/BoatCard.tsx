@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Boat } from '@/data/boats';
-import { Star, Heart, MapPin } from 'lucide-react';
+import { Heart } from 'lucide-react';
 
 interface BoatCardProps {
   boat: Boat;
@@ -99,29 +99,11 @@ const BoatCard: React.FC<BoatCardProps> = ({ boat, currencySymbol = '฿' }) => 
           </button>
         </div>
         
-        {/* Content - Simplified */}
+        {/* Simplified Content - Only Name and Price */}
         <div className="p-4 text-white">
-          <div className="flex justify-between items-start">
-            <h3 className="text-lg font-semibold text-white">{boat.name}</h3>
-            <div className="flex items-center gap-1 text-sm">
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <span className="font-medium">{boat.rating}</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-1 mt-2 text-blue-200 text-sm">
-            <MapPin className="h-3.5 w-3.5" />
-            <span>{boat.location}</span>
-          </div>
-          
-          <div className="mt-4 pt-4 border-t border-purple-700/30 flex justify-between items-center">
-            <div>
-              <span className="text-sm text-blue-200">Price from</span>
-              <p className="text-lg font-bold text-white">{currencySymbol}{boat.price}<span className="text-sm font-medium text-blue-200">/hour</span></p>
-            </div>
-            <div className="bg-orange-500 text-white font-medium rounded-lg py-1 px-3 text-sm hover:bg-orange-600 transition-colors">
-              View Details
-            </div>
+          <h3 className="text-lg font-semibold text-white">{boat.name}</h3>
+          <div className="mt-2 pt-2 border-t border-purple-700/30 flex items-center">
+            <p className="text-lg font-bold text-white">{currencySymbol}{boat.price}<span className="text-sm font-medium text-blue-200">/hour</span></p>
           </div>
         </div>
       </div>
