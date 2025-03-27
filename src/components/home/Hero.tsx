@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Calendar, Users, MapPin, ArrowRight, ArrowLeftRight } from 'lucide-react';
+import { Search, Calendar, Users, MapPin, ArrowLeftRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 const Hero = () => {
@@ -27,7 +27,7 @@ const Hero = () => {
             Where do you want to go?
           </h1>
           
-          {/* Search Box - Redesigned to match screenshot */}
+          {/* Search Box */}
           <div className="bg-indigo-900/90 backdrop-blur-md rounded-xl p-6 shadow-lg max-w-2xl animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
             {/* Tabs */}
             <div className="flex mb-6">
