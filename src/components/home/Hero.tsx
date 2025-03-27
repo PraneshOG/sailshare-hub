@@ -29,7 +29,7 @@ const Hero = () => {
           
           {/* Search Box */}
           <div className="bg-indigo-900/90 backdrop-blur-md rounded-xl p-6 shadow-lg max-w-2xl animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-            {/* Tabs */}
+            {/* Tabs - Only Boats */}
             <div className="flex mb-6">
               <div className="flex items-center gap-4">
                 <div className="bg-red-500 rounded-full p-3">
@@ -38,27 +38,6 @@ const Hero = () => {
                   </svg>
                 </div>
                 <span className="text-white font-medium">Boats</span>
-              </div>
-              <div className="flex items-center gap-2 ml-8">
-                <div className="bg-indigo-800/50 rounded-full p-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 11a9 9 0 0 1 9 9"></path>
-                    <path d="M4 4a16 16 0 0 1 16 16"></path>
-                    <circle cx="5" cy="19" r="1"></circle>
-                  </svg>
-                </div>
-                <span className="text-white/70 font-medium">Stays</span>
-              </div>
-              <div className="flex items-center gap-2 ml-8">
-                <div className="bg-indigo-800/50 rounded-full p-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="1" y="3" width="15" height="13"></rect>
-                    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-                    <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                    <circle cx="18.5" cy="18.5" r="2.5"></circle>
-                  </svg>
-                </div>
-                <span className="text-white/70 font-medium">Car Hire</span>
               </div>
             </div>
             
