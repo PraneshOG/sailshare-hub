@@ -17,12 +17,12 @@ const ExclusiveDeals = () => {
         const updatedDeals = dealsData.map(deal => ({
           ...deal,
           image_url: deal.id === "54cf0e16-7efe-4f6c-a5f8-3ed4b20a2b31" 
-            ? "https://images.pexels.com/photos/775410/pexels-photo-775410.jpeg"
+            ? "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/luxury-yacht-weekend.jpg"
             : deal.id === "69976841-36d9-416f-85bb-e6232d30c3b9"
-            ? "https://images.pexels.com/photos/1430677/pexels-photo-1430677.jpeg" 
+            ? "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/island-hopping.jpg" 
             : deal.id === "6a4f9c86-d367-4d72-b2af-af1c0efffeb5"
-            ? "https://images.pexels.com/photos/753331/pexels-photo-753331.jpeg"
-            : "https://images.pexels.com/photos/163236/luxury-yacht-boat-speed-water-163236.jpeg"
+            ? "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/sunset-sailing.jpg"
+            : "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/fishing-trip.jpg"
         }));
         
         setDeals(updatedDeals);
@@ -36,7 +36,7 @@ const ExclusiveDeals = () => {
             original_price: 45000,
             discounted_price: 35000,
             location: "Phi Phi Islands",
-            image_url: "https://images.pexels.com/photos/775410/pexels-photo-775410.jpeg",
+            image_url: "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/luxury-yacht-weekend.jpg",
             valid_until: "2024-12-31",
             created_at: new Date().toISOString()
           },
@@ -47,7 +47,7 @@ const ExclusiveDeals = () => {
             original_price: 12000,
             discounted_price: 8500,
             location: "Krabi",
-            image_url: "https://images.pexels.com/photos/1430677/pexels-photo-1430677.jpeg",
+            image_url: "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/island-hopping.jpg",
             valid_until: "2024-11-30",
             created_at: new Date().toISOString()
           },
@@ -58,7 +58,7 @@ const ExclusiveDeals = () => {
             original_price: 15000,
             discounted_price: 10000,
             location: "Koh Samui",
-            image_url: "https://images.pexels.com/photos/753331/pexels-photo-753331.jpeg",
+            image_url: "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/sunset-sailing.jpg",
             valid_until: "2024-10-15",
             created_at: new Date().toISOString()
           },
@@ -69,7 +69,7 @@ const ExclusiveDeals = () => {
             original_price: 18000,
             discounted_price: 12000,
             location: "Phuket",
-            image_url: "https://images.pexels.com/photos/163236/luxury-yacht-boat-speed-water-163236.jpeg",
+            image_url: "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/fishing-trip.jpg",
             valid_until: "2024-09-30",
             created_at: new Date().toISOString()
           }
