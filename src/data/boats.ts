@@ -34,16 +34,16 @@ export const boats: Boat[] = [
     description: "Experience luxury on the water with this stunning motor yacht. Perfect for day trips or sunset cruises with family and friends.",
     amenities: ["Bluetooth Sound System", "Swimming Platform", "Refrigerator", "Shower", "Sun Deck", "GPS Navigation"],
     images: [
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/azure-dream-1.jpg",
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/azure-dream-2.jpg",
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/azure-dream-3.jpg"
+      "https://picsum.photos/800/600?random=1",
+      "https://picsum.photos/800/600?random=2",
+      "https://picsum.photos/800/600?random=3"
     ],
     rating: 4.9,
     reviewCount: 28,
     featured: true,
     boatOwner: {
       name: "Michael Scott",
-      image: "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/owner-michael.jpg",
+      image: "https://picsum.photos/200/200?random=4",
       responseRate: 98
     }
   },
@@ -59,16 +59,16 @@ export const boats: Boat[] = [
     description: "Set sail on this beautiful sailing yacht and enjoy the peaceful experience of gliding through the waves powered by the wind.",
     amenities: ["Fully Equipped Galley", "Cabin Berths", "Marine Toilet", "Snorkeling Gear", "Cockpit Cushions", "VHF Radio"],
     images: [
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/ocean-voyager-1.jpg",
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/ocean-voyager-2.jpg",
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/ocean-voyager-3.jpg"
+      "https://picsum.photos/800/600?random=5",
+      "https://picsum.photos/800/600?random=6",
+      "https://picsum.photos/800/600?random=7"
     ],
     rating: 4.7,
     reviewCount: 19,
     featured: true,
     boatOwner: {
       name: "Emily Johnson",
-      image: "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/owner-emily.jpg",
+      image: "https://picsum.photos/200/200?random=8",
       responseRate: 95
     }
   },
@@ -84,16 +84,16 @@ export const boats: Boat[] = [
     description: "Enjoy the ultimate stability and space of this modern catamaran. Great for larger groups wanting to explore coastal waters in comfort.",
     amenities: ["Spacious Sundeck", "Fresh Water Shower", "Kitchenette", "Bluetooth Speakers", "Snorkeling Equipment", "Cooler"],
     images: [
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/coastal-explorer-1.jpg",
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/coastal-explorer-2.jpg",
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/coastal-explorer-3.jpg"
+      "https://picsum.photos/800/600?random=9",
+      "https://picsum.photos/800/600?random=10",
+      "https://picsum.photos/800/600?random=11"
     ],
     rating: 4.8,
     reviewCount: 34,
     featured: true,
     boatOwner: {
       name: "David Wilson",
-      image: "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/owner-david.jpg",
+      image: "https://picsum.photos/200/200?random=12",
       responseRate: 99
     }
   },
@@ -109,15 +109,15 @@ export const boats: Boat[] = [
     description: "Perfect for a relaxed day on the water. This comfortable pontoon boat is ideal for sightseeing, fishing, or just cruising the harbor.",
     amenities: ["Bimini Top", "Bluetooth Stereo", "Swim Ladder", "Comfortable Seating", "Cooler", "USB Charging"],
     images: [
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/harbor-cruiser-1.jpg",
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/harbor-cruiser-2.jpg",
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/harbor-cruiser-3.jpg"
+      "https://picsum.photos/800/600?random=13",
+      "https://picsum.photos/800/600?random=14",
+      "https://picsum.photos/800/600?random=15"
     ],
     rating: 4.6,
     reviewCount: 23,
     boatOwner: {
       name: "Sarah Martinez",
-      image: "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/owner-sarah.jpg",
+      image: "https://picsum.photos/200/200?random=16",
       responseRate: 92
     }
   },
@@ -133,15 +133,15 @@ export const boats: Boat[] = [
     description: "Feel the thrill of speed on this powerful speedboat. Ideal for watersports enthusiasts or those who just want to feel the wind in their hair.",
     amenities: ["Powerful Engine", "Wakeboard Rack", "Premium Sound System", "GPS Navigation", "Bimini Top", "Swim Platform"],
     images: [
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/wave-rider-1.jpg",
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/wave-rider-2.jpg",
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/wave-rider-3.jpg"
+      "https://picsum.photos/800/600?random=17",
+      "https://picsum.photos/800/600?random=18",
+      "https://picsum.photos/800/600?random=19"
     ],
     rating: 4.8,
     reviewCount: 17,
     boatOwner: {
       name: "Alex Thompson",
-      image: "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/owner-alex.jpg",
+      image: "https://picsum.photos/200/200?random=20",
       responseRate: 97
     }
   },
@@ -157,15 +157,15 @@ export const boats: Boat[] = [
     description: "A versatile boat perfect for day cruising, watersports, and making memories on the water with family and friends.",
     amenities: ["Premium Sound System", "Bimini Top", "Swim Platform", "Comfortable Seating", "Storage Space", "Cup Holders"],
     images: [
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/sunset-serenity-1.jpg",
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/sunset-serenity-2.jpg",
-      "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/sunset-serenity-3.jpg"
+      "https://picsum.photos/800/600?random=21",
+      "https://picsum.photos/800/600?random=22",
+      "https://picsum.photos/800/600?random=23"
     ],
     rating: 4.5,
     reviewCount: 21,
     boatOwner: {
       name: "Jessica Brown",
-      image: "https://ebqyejdubaexrjgmkqpj.supabase.co/storage/v1/object/public/boat-images/owner-jessica.jpg",
+      image: "https://picsum.photos/200/200?random=24",
       responseRate: 94
     }
   }
