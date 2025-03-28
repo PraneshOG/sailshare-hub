@@ -1,12 +1,14 @@
 
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Users, Anchor, Ship, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchBoats, Boat } from '@/integrations/supabase/services';
 import SearchBar from '@/components/common/SearchBar';
+import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 const BoatDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +18,8 @@ const BoatDetail = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [guestCount, setGuestCount] = useState(2);
   const [duration, setDuration] = useState(4);
+  const navigate = useNavigate();
+  const { toast } = useToast();
   
   useEffect(() => {
     const loadBoat = async () => {
@@ -52,6 +56,40 @@ const BoatDetail = () => {
     setCurrentImageIndex((prevIndex) => 
       prevIndex === boat.images.length - 1 ? 0 : prevIndex + 1
     );
+  };
+
+  const handleReserveNow = () => {
+    if (!boat) return;
+    
+    if (!selectedDate) {
+      toast({
+        title: "Date required",
+        description: "Please select a date for your reservation",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Format the time based on the duration
+    const timeString = "10:00 AM"; // Default start time
+    
+    // Calculate total price
+    const totalPrice = boat.price_per_hour * duration + 800; // Adding cleaning fee + service fee (500 + 300)
+    
+    // Navigate to checkout with all booking details
+    navigate('/checkout', { 
+      state: {
+        boatId: boat.id,
+        boatName: boat.name,
+        boatImage: boat.images[0],
+        date: selectedDate.toISOString(),
+        time: timeString,
+        duration: duration,
+        guestCount: guestCount,
+        price: boat.price_per_hour,
+        totalPrice: totalPrice
+      }
+    });
   };
 
   if (isLoading) {
@@ -135,8 +173,8 @@ const BoatDetail = () => {
         {/* Image Gallery */}
         <div className="relative h-96 rounded-xl overflow-hidden mb-8">
           <img 
-            src={boat.images[currentImageIndex]} 
-            alt={boat.name} 
+            src={boat?.images[currentImageIndex]} 
+            alt={boat?.name} 
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
@@ -144,12 +182,12 @@ const BoatDetail = () => {
               <div className="flex justify-between items-end">
                 <div>
                   <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                    {boat.type}
+                    {boat?.type}
                   </span>
-                  <h1 className="text-3xl md:text-4xl font-bold text-white mt-2">{boat.name}</h1>
+                  <h1 className="text-3xl md:text-4xl font-bold text-white mt-2">{boat?.name}</h1>
                   <div className="flex items-center gap-2 text-blue-200 mt-2">
                     <MapPin className="h-4 w-4" />
-                    <span>{boat.location}</span>
+                    <span>{boat?.location}</span>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -181,24 +219,24 @@ const BoatDetail = () => {
             <div className="flex items-center gap-6 mb-6 flex-wrap">
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-blue-300" />
-                <span>Up to {boat.capacity} guests</span>
+                <span>Up to {boat?.capacity} guests</span>
               </div>
               <div className="flex items-center gap-2">
                 <Ship className="h-5 w-5 text-blue-300" />
-                <span>{boat.type}</span>
+                <span>{boat?.type}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Star className="h-5 w-5 text-yellow-400" />
-                <span>{boat.rating} / 5 ({Math.floor(Math.random() * 30) + 5} reviews)</span>
+                <span>{boat?.rating} / 5 ({Math.floor(Math.random() * 30) + 5} reviews)</span>
               </div>
             </div>
             
             <h2 className="text-xl font-semibold mb-4">About This Boat</h2>
-            <p className="text-blue-100 mb-8">{boat.description}</p>
+            <p className="text-blue-100 mb-8">{boat?.description}</p>
             
             <h2 className="text-xl font-semibold mb-4">Features & Amenities</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-              {boat.features.map((feature, index) => (
+              {boat?.features.map((feature, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <Anchor className="h-4 w-4 text-blue-300" />
                   <span>{feature}</span>
@@ -211,12 +249,12 @@ const BoatDetail = () => {
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 shadow-lg h-fit sticky top-24">
             <div className="flex justify-between items-center mb-4">
               <div>
-                <span className="text-2xl font-bold">฿{boat.price_per_hour.toLocaleString()}</span>
+                <span className="text-2xl font-bold">฿{boat?.price_per_hour.toLocaleString()}</span>
                 <span className="text-blue-200"> / hour</span>
               </div>
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 text-yellow-400" />
-                <span className="font-medium">{boat.rating}</span>
+                <span className="font-medium">{boat?.rating}</span>
               </div>
             </div>
             
@@ -231,6 +269,7 @@ const BoatDetail = () => {
                     type="date" 
                     className="w-full pl-10 py-2 bg-white/10 border border-gray-400/30 rounded-lg text-white"
                     onChange={(e) => setSelectedDate(e.target.value ? new Date(e.target.value) : null)}
+                    min={new Date().toISOString().split('T')[0]}
                   />
                 </div>
               </div>
@@ -246,7 +285,7 @@ const BoatDetail = () => {
                     value={guestCount}
                     onChange={(e) => setGuestCount(parseInt(e.target.value))}
                   >
-                    {[...Array(boat.capacity)].map((_, i) => (
+                    {[...Array(boat?.capacity)].map((_, i) => (
                       <option key={i} value={i + 1}>{i + 1} {i === 0 ? 'Guest' : 'Guests'}</option>
                     ))}
                   </select>
@@ -275,7 +314,7 @@ const BoatDetail = () => {
             
             <div className="border-t border-gray-200/20 pt-4 mb-4">
               <div className="flex justify-between mb-2">
-                <span>฿{boat.price_per_hour.toLocaleString()} × {duration} hours</span>
+                <span>฿{boat?.price_per_hour.toLocaleString()} × {duration} hours</span>
                 <span>฿{totalPrice.toLocaleString()}</span>
               </div>
               <div className="flex justify-between font-bold">
@@ -284,7 +323,10 @@ const BoatDetail = () => {
               </div>
             </div>
             
-            <Button className="w-full bg-red-500 hover:bg-red-600 text-white py-3">
+            <Button 
+              className="w-full bg-red-500 hover:bg-red-600 text-white py-3"
+              onClick={handleReserveNow}
+            >
               Reserve Now
             </Button>
           </div>
