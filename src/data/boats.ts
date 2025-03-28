@@ -1,4 +1,25 @@
-import { Boat } from './boats';
+
+export interface Boat {
+  id: string;
+  name: string;
+  type: string;
+  location: string;
+  price: number;
+  capacity: number;
+  length: number;
+  year: number;
+  description: string;
+  amenities: string[];
+  images: string[];
+  rating: number;
+  reviewCount: number;
+  featured?: boolean;
+  boatOwner: {
+    name: string;
+    image: string;
+    responseRate: number;
+  };
+}
 
 export const boats: Boat[] = [
   {
