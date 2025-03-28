@@ -209,26 +209,7 @@ const BoatsPage = () => {
               {filteredBoats.map((boat) => (
                 <BoatCard 
                   key={boat.id} 
-                  boat={{
-                    id: boat.id,
-                    name: boat.name,
-                    type: boat.type,
-                    location: boat.location,
-                    price: boat.price_per_hour,
-                    capacity: boat.capacity,
-                    length: 30, // Default value
-                    year: 2022, // Default value
-                    description: boat.description,
-                    amenities: boat.features,
-                    images: boat.images,
-                    rating: boat.rating,
-                    reviewCount: 15, // Default value
-                    boatOwner: {
-                      name: "Boat Owner",
-                      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop",
-                      responseRate: 98
-                    }
-                  }} 
+                  boat={boat}
                 />
               ))}
             </div>

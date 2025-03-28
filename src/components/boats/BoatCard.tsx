@@ -103,7 +103,7 @@ const BoatCard: React.FC<BoatCardProps> = ({ boat, currencySymbol = '฿' }) => 
         <div className="p-4 text-white">
           <h3 className="text-lg font-semibold text-white">{boat.name}</h3>
           <div className="mt-2 pt-2 border-t border-purple-700/30 flex items-center">
-            <p className="text-lg font-bold text-white">{currencySymbol}{boat.price}<span className="text-sm font-medium text-blue-200">/hour</span></p>
+            <p className="text-lg font-bold text-white">{currencySymbol}{boat.price_per_hour}<span className="text-sm font-medium text-blue-200">/hour</span></p>
           </div>
         </div>
       </div>
