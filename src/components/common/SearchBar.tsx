@@ -40,45 +40,45 @@ const SearchBar = ({ compact = false }: SearchBarProps) => {
   };
 
   return (
-    <div className={`bg-indigo-900/90 backdrop-blur-md rounded-xl ${compact ? 'p-4' : 'p-6'} shadow-lg max-w-4xl mx-auto`}>
+    <div className={`bg-indigo-900/90 backdrop-blur-md rounded-xl ${compact ? 'p-2' : 'p-4'} shadow-lg max-w-4xl mx-auto`}>
       <Tabs defaultValue="round-trip" onValueChange={setTripType}>
-        <TabsList className="mb-4 bg-indigo-800">
+        <TabsList className="mb-2 bg-indigo-800">
           <TabsTrigger value="round-trip" className="data-[state=active]:bg-red-500">Round trip</TabsTrigger>
           <TabsTrigger value="one-way" className="data-[state=active]:bg-red-500">One way</TabsTrigger>
         </TabsList>
 
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-2">
           {/* Origin/Destination */}
           <div className="bg-white rounded-lg flex items-center">
             <div className="flex-1 relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <MapPin className="h-5 w-5 text-gray-400" />
+                <MapPin className="h-4 w-4 text-gray-400" />
               </div>
               <input 
                 type="text" 
-                className="w-full pl-10 pr-3 py-3 border-0 rounded-l-lg focus:ring-0"
+                className="w-full pl-8 pr-3 py-2 border-0 rounded-l-lg focus:ring-0 text-sm"
                 placeholder="From where?"
                 value={searchLocation}
                 onChange={(e) => setSearchLocation(e.target.value)}
               />
             </div>
             
-            <div className="px-2">
+            <div className="px-1">
               <button 
-                className="bg-red-500 rounded-full p-2"
+                className="bg-red-500 rounded-full p-1"
                 onClick={swapLocations}
               >
-                <ArrowRightLeft className="h-4 w-4 text-white" />
+                <ArrowRightLeft className="h-3 w-3 text-white" />
               </button>
             </div>
             
             <div className="flex-1 relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <MapPin className="h-5 w-5 text-gray-400" />
+                <MapPin className="h-4 w-4 text-gray-400" />
               </div>
               <input 
                 type="text" 
-                className="w-full pl-10 pr-3 py-3 border-0 rounded-r-lg focus:ring-0"
+                className="w-full pl-8 pr-3 py-2 border-0 rounded-r-lg focus:ring-0 text-sm"
                 placeholder="To where?"
                 value={searchDestination}
                 onChange={(e) => setSearchDestination(e.target.value)}
@@ -87,18 +87,18 @@ const SearchBar = ({ compact = false }: SearchBarProps) => {
           </div>
           
           {/* Date Selection */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2">
             <Popover>
               <PopoverTrigger asChild>
                 <Button 
                   variant="outline" 
-                  className="bg-white rounded-lg relative w-full flex justify-start font-normal border-0"
+                  className="bg-white rounded-lg relative w-full flex justify-start font-normal border-0 text-sm h-10"
                 >
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <Calendar className="h-5 w-5 text-gray-400" />
+                    <Calendar className="h-4 w-4 text-gray-400" />
                   </div>
-                  <span className="pl-10">
-                    {departureDate ? format(departureDate, 'dd MMM yyyy') : 'Departure date'}
+                  <span className="pl-8 text-sm">
+                    {departureDate ? format(departureDate, 'dd MMM yyyy') : 'Departure'}
                   </span>
                 </Button>
               </PopoverTrigger>
@@ -108,7 +108,7 @@ const SearchBar = ({ compact = false }: SearchBarProps) => {
                   selected={departureDate}
                   onSelect={setDepartureDate}
                   initialFocus
-                  className="p-3 pointer-events-auto"
+                  className="p-2 pointer-events-auto"
                 />
               </PopoverContent>
             </Popover>
@@ -118,13 +118,13 @@ const SearchBar = ({ compact = false }: SearchBarProps) => {
                 <PopoverTrigger asChild>
                   <Button 
                     variant="outline" 
-                    className="bg-white rounded-lg relative w-full flex justify-start font-normal border-0"
+                    className="bg-white rounded-lg relative w-full flex justify-start font-normal border-0 text-sm h-10"
                   >
                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                      <Calendar className="h-5 w-5 text-gray-400" />
+                      <Calendar className="h-4 w-4 text-gray-400" />
                     </div>
-                    <span className="pl-10">
-                      {returnDate ? format(returnDate, 'dd MMM yyyy') : 'Return date'}
+                    <span className="pl-8 text-sm">
+                      {returnDate ? format(returnDate, 'dd MMM yyyy') : 'Return'}
                     </span>
                   </Button>
                 </PopoverTrigger>
@@ -135,7 +135,7 @@ const SearchBar = ({ compact = false }: SearchBarProps) => {
                     onSelect={setReturnDate}
                     initialFocus
                     disabled={date => !departureDate || date < departureDate}
-                    className="p-3 pointer-events-auto"
+                    className="p-2 pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
@@ -145,10 +145,10 @@ const SearchBar = ({ compact = false }: SearchBarProps) => {
           {/* Passenger Selection */}
           <div className="bg-white rounded-lg relative">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Users className="h-5 w-5 text-gray-400" />
+              <Users className="h-4 w-4 text-gray-400" />
             </div>
             <select 
-              className="w-full pl-10 pr-3 py-3 border-0 rounded-lg focus:ring-0 appearance-none bg-white"
+              className="w-full pl-8 pr-3 py-2 border-0 rounded-lg focus:ring-0 appearance-none bg-white text-sm"
               value={passengers}
               onChange={(e) => setPassengers(e.target.value)}
             >
@@ -160,10 +160,10 @@ const SearchBar = ({ compact = false }: SearchBarProps) => {
           </div>
         </div>
         
-        <div className="mt-4 flex justify-end">
+        <div className="mt-2 flex justify-end">
           <Button 
             onClick={handleSearch} 
-            className="bg-red-500 hover:bg-red-600 px-6 py-2 text-white rounded-lg transition-all"
+            className="bg-red-500 hover:bg-red-600 px-4 py-2 text-white rounded-lg transition-all text-sm"
           >
             Search
           </Button>

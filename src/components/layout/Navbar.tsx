@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, Search, Ship } from 'lucide-react';
+import { Menu, X, User, Ship } from 'lucide-react';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -37,16 +37,6 @@ const Navbar = () => {
           <span className="hidden sm:inline gradient-text bg-gradient-to-r from-red-500 to-orange-500 text-transparent bg-clip-text">SailShare</span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8">
-          <Link 
-            to="/boats" 
-            className="text-white hover:text-orange-400 transition-colors font-medium"
-          >
-            Find Boats
-          </Link>
-        </div>
-
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-4">
           <Link to="/auth">
@@ -79,12 +69,6 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-indigo-900 border-t border-indigo-800 animate-fade-in-up">
           <div className="container mx-auto py-4 px-4 flex flex-col gap-4">
-            <Link 
-              to="/boats" 
-              className="text-white hover:text-orange-400 py-2 border-b border-indigo-800"
-            >
-              Find Boats
-            </Link>
             <div className="flex items-center justify-between pt-2 gap-4">
               <Link to="/auth" className="w-full">
                 <Button 
