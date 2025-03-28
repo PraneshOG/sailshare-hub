@@ -1,9 +1,10 @@
 
 import { useState } from 'react';
-import { Trash2, PlusCircle, Upload, Camera } from 'lucide-react';
+import { Trash2, PlusCircle, Upload, Camera, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/components/ui/use-toast';
 
 interface GuestDetail {
   name: string;
@@ -20,12 +21,15 @@ interface GuestDetailsFormProps {
 
 const GuestDetailsForm = ({ guestCount, onGuestDetailsChange }: GuestDetailsFormProps) => {
   const [guestDetails, setGuestDetails] = useState<GuestDetail[]>([
-    { name: '', age: '', idType: 'aadhar', idNumber: '', photoUploaded: false }
+    { name: '', age: '', idType: 'passport', idNumber: '', photoUploaded: false }
   ]);
+  const [emailInput, setEmailInput] = useState<{ [key: number]: string }>({});
+  const [showEmailInput, setShowEmailInput] = useState<{ [key: number]: boolean }>({});
+  const { toast } = useToast();
 
   const handleAddGuest = () => {
     if (guestDetails.length < guestCount) {
-      const newGuestDetails = [...guestDetails, { name: '', age: '', idType: 'aadhar', idNumber: '', photoUploaded: false }];
+      const newGuestDetails = [...guestDetails, { name: '', age: '', idType: 'passport', idNumber: '', photoUploaded: false }];
       setGuestDetails(newGuestDetails);
       onGuestDetailsChange(newGuestDetails);
     }
@@ -53,6 +57,36 @@ const GuestDetailsForm = ({ guestCount, onGuestDetailsChange }: GuestDetailsForm
     newGuestDetails[index] = { ...newGuestDetails[index], photoUploaded: true };
     setGuestDetails(newGuestDetails);
     onGuestDetailsChange(newGuestDetails);
+  };
+
+  const handleSendEmailVerification = (index: number) => {
+    const email = emailInput[index];
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // In a real app, this would send an email with a link to upload photo
+    toast({
+      title: "Verification Email Sent",
+      description: `An email has been sent to ${email} with instructions to upload photo ID.`,
+      variant: "default"
+    });
+
+    // For demo purposes, we'll simulate the email being sent and a photo being uploaded
+    setTimeout(() => {
+      const newGuestDetails = [...guestDetails];
+      newGuestDetails[index] = { ...newGuestDetails[index], photoUploaded: true };
+      setGuestDetails(newGuestDetails);
+      onGuestDetailsChange(newGuestDetails);
+
+      // Hide the email input once sent
+      setShowEmailInput(prev => ({ ...prev, [index]: false }));
+    }, 1500);
   };
 
   return (
@@ -125,11 +159,8 @@ const GuestDetailsForm = ({ guestCount, onGuestDetailsChange }: GuestDetailsForm
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-ocean-500/50 focus:border-transparent transition-all"
                 required
               >
-                <option value="aadhar">Aadhar Card</option>
-                <option value="pan">PAN Card</option>
-                <option value="driving">Driving License</option>
-                <option value="voter">Voter ID</option>
                 <option value="passport">Passport</option>
+                <option value="driving">Driving License</option>
               </select>
             </div>
 
@@ -171,28 +202,71 @@ const GuestDetailsForm = ({ guestCount, onGuestDetailsChange }: GuestDetailsForm
                 <div className="text-center">
                   <Camera className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                   <p className="text-sm text-gray-700 mb-4">Upload a photo for identity verification</p>
-                  <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePhotoUpload(index)}
-                      className="flex items-center gap-1"
-                    >
-                      <Upload className="h-4 w-4" />
-                      Upload Photo
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePhotoUpload(index)}
-                      className="flex items-center gap-1"
-                    >
-                      <Camera className="h-4 w-4" />
-                      Take Photo
-                    </Button>
-                  </div>
+                  
+                  {showEmailInput[index] ? (
+                    <div className="space-y-3">
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <Input
+                          type="email"
+                          placeholder="Enter email address"
+                          value={emailInput[index] || ''}
+                          onChange={(e) => setEmailInput(prev => ({ ...prev, [index]: e.target.value }))}
+                          className="flex-grow"
+                        />
+                        <Button
+                          type="button"
+                          variant="default"
+                          size="sm"
+                          onClick={() => handleSendEmailVerification(index)}
+                          className="whitespace-nowrap"
+                        >
+                          Send Link
+                        </Button>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowEmailInput(prev => ({ ...prev, [index]: false }))}
+                        className="text-gray-500"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePhotoUpload(index)}
+                        className="flex items-center gap-1"
+                      >
+                        <Upload className="h-4 w-4" />
+                        Upload Photo
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePhotoUpload(index)}
+                        className="flex items-center gap-1"
+                      >
+                        <Camera className="h-4 w-4" />
+                        Take Photo
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowEmailInput(prev => ({ ...prev, [index]: true }))}
+                        className="flex items-center gap-1"
+                      >
+                        <Mail className="h-4 w-4" />
+                        Email Link
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

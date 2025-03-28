@@ -1,5 +1,17 @@
 
-import { Boat } from '@/integrations/supabase/services';
+export type Boat = {
+  id: string;
+  name: string;
+  type: string;
+  location: string;
+  price_per_hour: number;
+  capacity: number;
+  description: string;
+  features: string[];
+  images: string[];
+  rating: number;
+  created_at: string;
+};
 
 export const boats: Boat[] = [
   {
