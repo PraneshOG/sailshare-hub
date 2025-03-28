@@ -4,9 +4,10 @@ import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import BoatCard from '@/components/boats/BoatCard';
-import { getAllBoats, Boat } from '@/data/boats';
+import { fetchBoats, Boat } from '@/integrations/supabase/services';
 import { Sliders, Search, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SearchBar from '@/components/common/SearchBar';
 
 const BoatsPage = () => {
   const location = useLocation();
@@ -23,31 +24,22 @@ const BoatsPage = () => {
   useEffect(() => {
     // Parse query parameters
     const params = new URLSearchParams(location.search);
-    const locationParam = params.get('location');
-    if (locationParam) {
-      setSearchTerm(locationParam);
+    const fromParam = params.get('from');
+    if (fromParam) {
+      setSearchTerm(fromParam);
     }
 
-    // Simulate API loading delay
-    const timer = setTimeout(() => {
-      const allBoats = getAllBoats();
-      // Convert prices to Thai Baht and ensure all boats have at least 3 images
-      const convertedBoats = allBoats.map(boat => ({
-        ...boat,
-        price: boat.price * 35, // Approximate USD to THB conversion
-        // Ensure all boats have at least 3 images with different images
-        images: boat.images.length >= 3 ? boat.images : [
-          "https://images.unsplash.com/photo-1540946485063-a40da27545f8?q=80&w=2070&auto=format&fit=crop",
-          "https://images.unsplash.com/photo-1605281317010-fe5ffe798166?q=80&w=2048&auto=format&fit=crop",
-          "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop"
-        ]
-      }));
-      setBoats(convertedBoats);
-      setFilteredBoats(convertedBoats);
+    // Load boats from Supabase
+    const loadBoats = async () => {
+      setIsLoading(true);
+      const boatsData = await fetchBoats();
+      
+      setBoats(boatsData);
+      setFilteredBoats(boatsData);
       setIsLoading(false);
-    }, 800);
+    };
 
-    return () => clearTimeout(timer);
+    loadBoats();
   }, [location.search]);
   
   useEffect(() => {
@@ -67,7 +59,7 @@ const BoatsPage = () => {
       
       // Apply price filter
       results = results.filter(
-        boat => boat.price >= priceRange[0] && boat.price <= priceRange[1]
+        boat => boat.price_per_hour >= priceRange[0] && boat.price_per_hour <= priceRange[1]
       );
       
       // Apply boat type filter
@@ -86,7 +78,12 @@ const BoatsPage = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-indigo-900 to-purple-900 text-white">
       <Navbar />
       
-      <main className="flex-grow pt-24 pb-20">
+      {/* Persistent SearchBar */}
+      <div className="pt-24 px-4 bg-indigo-900">
+        <SearchBar compact={true} />
+      </div>
+      
+      <main className="flex-grow pt-8 pb-20">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
             <div>
@@ -210,7 +207,29 @@ const BoatsPage = () => {
           ) : filteredBoats.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredBoats.map((boat) => (
-                <BoatCard key={boat.id} boat={boat} />
+                <BoatCard 
+                  key={boat.id} 
+                  boat={{
+                    id: boat.id,
+                    name: boat.name,
+                    type: boat.type,
+                    location: boat.location,
+                    price: boat.price_per_hour,
+                    capacity: boat.capacity,
+                    length: 30, // Default value
+                    year: 2022, // Default value
+                    description: boat.description,
+                    amenities: boat.features,
+                    images: boat.images,
+                    rating: boat.rating,
+                    reviewCount: 15, // Default value
+                    boatOwner: {
+                      name: "Boat Owner",
+                      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop",
+                      responseRate: 98
+                    }
+                  }} 
+                />
               ))}
             </div>
           ) : (

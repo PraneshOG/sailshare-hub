@@ -1,10 +1,9 @@
 
 import { useEffect, useState } from 'react';
-import { getFeaturedBoats } from '@/data/boats';
-import { Boat } from '@/data/boats';
+import { fetchBoats, Boat } from '@/integrations/supabase/services';
 import BoatCard from '@/components/boats/BoatCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 
 const FeaturedBoats = () => {
@@ -12,29 +11,21 @@ const FeaturedBoats = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate API loading delay
-    const timer = setTimeout(() => {
-      const boats = getFeaturedBoats();
-      // Convert prices to Thai Baht (example conversion)
-      const convertedBoats = boats.map(boat => ({
-        ...boat,
-        price: boat.price * 35, // Approximate USD to THB conversion
-        // Ensure all boats have at least 3 images with different images
-        images: boat.images.length >= 3 ? boat.images : [
-          "https://images.unsplash.com/photo-1540946485063-a40da27545f8?q=80&w=2070&auto=format&fit=crop",
-          "https://images.unsplash.com/photo-1605281317010-fe5ffe798166?q=80&w=2048&auto=format&fit=crop",
-          "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop"
-        ]
-      }));
-      setFeaturedBoats(convertedBoats);
+    const loadBoats = async () => {
+      setIsLoading(true);
+      const boats = await fetchBoats();
+      
+      // Take the first 3 boats as featured
+      const featured = boats.slice(0, 3);
+      setFeaturedBoats(featured);
       setIsLoading(false);
-    }, 500);
+    };
 
-    return () => clearTimeout(timer);
+    loadBoats();
   }, []);
 
   return (
-    <section id="featured-boats" className="py-20 bg-gradient-to-b from-indigo-900 to-purple-900 text-white">
+    <section id="featured-boats" className="py-16 bg-gradient-to-b from-indigo-900 to-purple-900 text-white">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-10">
           <div>
@@ -70,7 +61,29 @@ const FeaturedBoats = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredBoats.map((boat) => (
-              <BoatCard key={boat.id} boat={boat} currencySymbol="฿" />
+              <BoatCard 
+                key={boat.id} 
+                boat={{
+                  id: boat.id,
+                  name: boat.name,
+                  type: boat.type,
+                  location: boat.location,
+                  price: boat.price_per_hour,
+                  capacity: boat.capacity,
+                  length: 30, // Default value
+                  year: 2022, // Default value
+                  description: boat.description,
+                  amenities: boat.features,
+                  images: boat.images,
+                  rating: boat.rating,
+                  reviewCount: 15, // Default value
+                  boatOwner: {
+                    name: "Boat Owner",
+                    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop",
+                    responseRate: 98
+                  }
+                }} 
+              />
             ))}
           </div>
         )}

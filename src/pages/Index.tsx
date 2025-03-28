@@ -3,6 +3,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Hero from '@/components/home/Hero';
 import FeaturedBoats from '@/components/home/FeaturedBoats';
+import ExclusiveDeals from '@/components/home/ExclusiveDeals';
 
 const Index = () => {
   return (
@@ -12,6 +13,9 @@ const Index = () => {
       <main className="flex-grow">
         {/* Hero Section */}
         <Hero />
+        
+        {/* Exclusive Deals Section */}
+        <ExclusiveDeals />
         
         {/* Featured Boats Section */}
         <FeaturedBoats />

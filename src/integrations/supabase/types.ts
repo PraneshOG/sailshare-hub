@@ -50,6 +50,48 @@ export type Database = {
           },
         ]
       }
+      boats: {
+        Row: {
+          capacity: number
+          created_at: string
+          description: string
+          features: string[] | null
+          id: string
+          images: string[]
+          location: string
+          name: string
+          price_per_hour: number
+          rating: number | null
+          type: string
+        }
+        Insert: {
+          capacity: number
+          created_at?: string
+          description: string
+          features?: string[] | null
+          id?: string
+          images: string[]
+          location: string
+          name: string
+          price_per_hour: number
+          rating?: number | null
+          type: string
+        }
+        Update: {
+          capacity?: number
+          created_at?: string
+          description?: string
+          features?: string[] | null
+          id?: string
+          images?: string[]
+          location?: string
+          name?: string
+          price_per_hour?: number
+          rating?: number | null
+          type?: string
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           address: string
@@ -77,6 +119,42 @@ export type Database = {
           name?: string
           phone?: string | null
           tax_id?: string
+        }
+        Relationships: []
+      }
+      deals: {
+        Row: {
+          created_at: string
+          description: string
+          discounted_price: number
+          id: string
+          image_url: string
+          location: string
+          original_price: number
+          title: string
+          valid_until: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          discounted_price: number
+          id?: string
+          image_url: string
+          location: string
+          original_price: number
+          title: string
+          valid_until: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          discounted_price?: number
+          id?: string
+          image_url?: string
+          location?: string
+          original_price?: number
+          title?: string
+          valid_until?: string
         }
         Relationships: []
       }
