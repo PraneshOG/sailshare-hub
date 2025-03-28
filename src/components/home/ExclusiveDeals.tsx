@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { fetchDeals, Deal } from '@/integrations/supabase/services';
 import { Button } from "@/components/ui/button";
@@ -12,9 +11,72 @@ const ExclusiveDeals = () => {
   useEffect(() => {
     const loadDeals = async () => {
       setIsLoading(true);
-      const dealsData = await fetchDeals();
-      setDeals(dealsData);
-      setIsLoading(false);
+      try {
+        const dealsData = await fetchDeals();
+        
+        const updatedDeals = dealsData.map(deal => ({
+          ...deal,
+          image_url: deal.id === "54cf0e16-7efe-4f6c-a5f8-3ed4b20a2b31" 
+            ? "https://images.pexels.com/photos/775410/pexels-photo-775410.jpeg"
+            : deal.id === "69976841-36d9-416f-85bb-e6232d30c3b9"
+            ? "https://images.pexels.com/photos/1430677/pexels-photo-1430677.jpeg" 
+            : deal.id === "6a4f9c86-d367-4d72-b2af-af1c0efffeb5"
+            ? "https://images.pexels.com/photos/753331/pexels-photo-753331.jpeg"
+            : "https://images.pexels.com/photos/163236/luxury-yacht-boat-speed-water-163236.jpeg"
+        }));
+        
+        setDeals(updatedDeals);
+      } catch (error) {
+        console.error("Error loading deals:", error);
+        setDeals([
+          {
+            id: "fallback-1",
+            title: "Luxury Yacht Weekend",
+            description: "3-day yacht experience with captain and crew included",
+            original_price: 45000,
+            discounted_price: 35000,
+            location: "Phi Phi Islands",
+            image_url: "https://images.pexels.com/photos/775410/pexels-photo-775410.jpeg",
+            valid_until: "2024-12-31",
+            created_at: new Date().toISOString()
+          },
+          {
+            id: "fallback-2",
+            title: "Island Hopping Adventure",
+            description: "Full day speedboat tour to 5 amazing islands",
+            original_price: 12000,
+            discounted_price: 8500,
+            location: "Krabi",
+            image_url: "https://images.pexels.com/photos/1430677/pexels-photo-1430677.jpeg",
+            valid_until: "2024-11-30",
+            created_at: new Date().toISOString()
+          },
+          {
+            id: "fallback-3",
+            title: "Sunset Sailing Experience",
+            description: "Romantic evening sail with dinner and drinks included",
+            original_price: 15000,
+            discounted_price: 10000,
+            location: "Koh Samui",
+            image_url: "https://images.pexels.com/photos/753331/pexels-photo-753331.jpeg",
+            valid_until: "2024-10-15",
+            created_at: new Date().toISOString()
+          },
+          {
+            id: "fallback-4",
+            title: "Fishing Day Trip",
+            description: "Full day fishing adventure with all equipment and lunch",
+            original_price: 18000,
+            discounted_price: 12000,
+            location: "Phuket",
+            image_url: "https://images.pexels.com/photos/163236/luxury-yacht-boat-speed-water-163236.jpeg",
+            valid_until: "2024-09-30",
+            created_at: new Date().toISOString()
+          }
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     loadDeals();

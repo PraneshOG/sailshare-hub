@@ -1,3 +1,4 @@
+
 export interface Boat {
   id: string;
   name: string;
@@ -33,16 +34,16 @@ export const boats: Boat[] = [
     description: "Experience luxury on the water with this stunning motor yacht. Perfect for day trips or sunset cruises with family and friends.",
     amenities: ["Bluetooth Sound System", "Swimming Platform", "Refrigerator", "Shower", "Sun Deck", "GPS Navigation"],
     images: [
-      "https://images.unsplash.com/photo-1566438480900-0609be27a4be?q=80&w=1994&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1628527304948-06172126f9db?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1589974732402-17600e20eef5?q=80&w=1976&auto=format&fit=crop"
+      "https://images.pexels.com/photos/163236/luxury-yacht-boat-speed-water-163236.jpeg",
+      "https://images.pexels.com/photos/673835/boat-sea-ship-yacht-673835.jpeg",
+      "https://images.pexels.com/photos/1295036/pexels-photo-1295036.jpeg"
     ],
     rating: 4.9,
     reviewCount: 28,
     featured: true,
     boatOwner: {
       name: "Michael Scott",
-      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop",
+      image: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg",
       responseRate: 98
     }
   },
@@ -58,16 +59,16 @@ export const boats: Boat[] = [
     description: "Set sail on this beautiful sailing yacht and enjoy the peaceful experience of gliding through the waves powered by the wind.",
     amenities: ["Fully Equipped Galley", "Cabin Berths", "Marine Toilet", "Snorkeling Gear", "Cockpit Cushions", "VHF Radio"],
     images: [
-      "https://images.unsplash.com/photo-1605281317010-fe5ffe798166?q=80&w=2048&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1561531051-412ffce1f6af?q=80&w=1972&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1543777167-1e8a0e9ae1ec?q=80&w=2070&auto=format&fit=crop"
+      "https://images.pexels.com/photos/273886/pexels-photo-273886.jpeg",
+      "https://images.pexels.com/photos/296278/pexels-photo-296278.jpeg",
+      "https://images.pexels.com/photos/1295038/pexels-photo-1295038.jpeg"
     ],
     rating: 4.7,
     reviewCount: 19,
     featured: true,
     boatOwner: {
       name: "Emily Johnson",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1976&auto=format&fit=crop",
+      image: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg",
       responseRate: 95
     }
   },
@@ -83,16 +84,16 @@ export const boats: Boat[] = [
     description: "Enjoy the ultimate stability and space of this modern catamaran. Great for larger groups wanting to explore coastal waters in comfort.",
     amenities: ["Spacious Sundeck", "Fresh Water Shower", "Kitchenette", "Bluetooth Speakers", "Snorkeling Equipment", "Cooler"],
     images: [
-      "https://images.unsplash.com/photo-1601671086461-18e87b2c1c60?q=80&w=1974&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1562163835-b8d5a1bc95a6?q=80&w=2071&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1599595344946-cb2a46ba469e?q=80&w=1974&auto=format&fit=crop"
+      "https://images.pexels.com/photos/1008155/pexels-photo-1008155.jpeg",
+      "https://images.pexels.com/photos/386148/pexels-photo-386148.jpeg",
+      "https://images.pexels.com/photos/756856/pexels-photo-756856.jpeg"
     ],
     rating: 4.8,
     reviewCount: 34,
     featured: true,
     boatOwner: {
       name: "David Wilson",
-      image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=1974&auto=format&fit=crop",
+      image: "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg",
       responseRate: 99
     }
   },
@@ -108,15 +109,15 @@ export const boats: Boat[] = [
     description: "Perfect for a relaxed day on the water. This comfortable pontoon boat is ideal for sightseeing, fishing, or just cruising the harbor.",
     amenities: ["Bimini Top", "Bluetooth Stereo", "Swim Ladder", "Comfortable Seating", "Cooler", "USB Charging"],
     images: [
-      "https://images.unsplash.com/photo-1550909051-ea1d7cc14a48?q=80&w=1974&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1609436132311-e4b0c9302506?q=80&w=1974&auto=format&fit=crop"
+      "https://images.pexels.com/photos/144273/pexels-photo-144273.jpeg",
+      "https://images.pexels.com/photos/2179295/pexels-photo-2179295.jpeg",
+      "https://images.pexels.com/photos/92866/pexels-photo-92866.jpeg"
     ],
     rating: 4.6,
     reviewCount: 23,
     boatOwner: {
       name: "Sarah Martinez",
-      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop",
+      image: "https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg",
       responseRate: 92
     }
   },
@@ -132,15 +133,15 @@ export const boats: Boat[] = [
     description: "Feel the thrill of speed on this powerful speedboat. Ideal for watersports enthusiasts or those who just want to feel the wind in their hair.",
     amenities: ["Powerful Engine", "Wakeboard Rack", "Premium Sound System", "GPS Navigation", "Bimini Top", "Swim Platform"],
     images: [
-      "https://images.unsplash.com/photo-1615329952697-9e2fa53887bb?q=80&w=1974&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1680200882499-2f43171f0d6e?q=80&w=1974&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1532236395709-7d70320fec2d?q=80&w=2002&auto=format&fit=crop"
+      "https://images.pexels.com/photos/1430672/pexels-photo-1430672.jpeg",
+      "https://images.pexels.com/photos/1427741/pexels-photo-1427741.jpeg",
+      "https://images.pexels.com/photos/358319/pexels-photo-358319.jpeg"
     ],
     rating: 4.8,
     reviewCount: 17,
     boatOwner: {
       name: "Alex Thompson",
-      image: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?q=80&w=1974&auto=format&fit=crop",
+      image: "https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg",
       responseRate: 97
     }
   },
@@ -156,15 +157,15 @@ export const boats: Boat[] = [
     description: "A versatile boat perfect for day cruising, watersports, and making memories on the water with family and friends.",
     amenities: ["Premium Sound System", "Bimini Top", "Swim Platform", "Comfortable Seating", "Storage Space", "Cup Holders"],
     images: [
-      "https://images.unsplash.com/photo-1630395822970-acd6a691d97e?q=80&w=1974&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1534184241306-2d5103231bad?q=80&w=1974&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1493894473891-10fc1e5dbd22?q=80&w=2069&auto=format&fit=crop"
+      "https://images.pexels.com/photos/163236/luxury-yacht-boat-speed-water-163236.jpeg",
+      "https://images.pexels.com/photos/127160/pexels-photo-127160.jpeg",
+      "https://images.pexels.com/photos/173789/pexels-photo-173789.jpeg"
     ],
     rating: 4.5,
     reviewCount: 21,
     boatOwner: {
       name: "Jessica Brown",
-      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop",
+      image: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg",
       responseRate: 94
     }
   }

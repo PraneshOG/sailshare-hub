@@ -8,7 +8,7 @@ const Hero = () => {
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <img 
-          src="https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?q=80&w=2070&auto=format&fit=crop" 
+          src="https://images.pexels.com/photos/3601425/pexels-photo-3601425.jpeg" 
           alt="Beautiful beach in Phuket, Thailand" 
           className="w-full h-full object-cover"
         />
