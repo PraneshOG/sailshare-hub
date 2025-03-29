@@ -8,12 +8,15 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger
+  SidebarTrigger,
+  useSidebar
 } from "@/components/ui/sidebar";
 import { Plane, Building, Car, Globe, Heart, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const MainSidebar = () => {
+  const { setOpenMobile, openMobile } = useSidebar();
+  
   const menuItems = [
     {
       title: "Flights",
@@ -47,9 +50,13 @@ const MainSidebar = () => {
     <Sidebar variant="inset" collapsible="offcanvas">
       <SidebarContent className="pt-16">
         <div className="absolute right-4 top-4 md:hidden">
-          <SidebarTrigger>
-            <X className="h-6 w-6" />
-          </SidebarTrigger>
+          <button 
+            onClick={() => setOpenMobile(false)} 
+            className="flex h-7 w-7 items-center justify-center rounded-md"
+          >
+            <X className="h-6 w-6 text-sidebar-foreground" />
+            <span className="sr-only">Close Sidebar</span>
+          </button>
         </div>
         
         <SidebarGroup>
@@ -62,6 +69,7 @@ const MainSidebar = () => {
                     asChild 
                     isActive={item.active}
                     tooltip={item.title}
+                    onClick={() => openMobile && setOpenMobile(false)}
                   >
                     <Link to={item.url} className="w-full">
                       <item.icon />

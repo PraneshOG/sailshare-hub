@@ -8,7 +8,7 @@ import MainSidebar from '@/components/layout/MainSidebar';
 
 const Index = () => {
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <div className="min-h-screen flex flex-col bg-gradient-to-b from-indigo-900 to-purple-900 w-full">
         <Navbar />
         

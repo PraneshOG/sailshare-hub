@@ -3,12 +3,13 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, Ship } from 'lucide-react';
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { toggleSidebar } = useSidebar();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,9 +32,13 @@ const Navbar = () => {
     >
       <nav className="container mx-auto px-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <SidebarTrigger className="md:hidden">
-            <Menu className="h-6 w-6 text-white" />
-          </SidebarTrigger>
+          <button 
+            onClick={toggleSidebar}
+            className="md:hidden flex h-7 w-7 items-center justify-center rounded-md text-white"
+            aria-label="Toggle menu"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
           <Link 
             to="/" 
             className="flex items-center gap-2 text-2xl font-bold text-white transition-all duration-300"
