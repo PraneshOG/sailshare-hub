@@ -1,11 +1,11 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Users, Search } from 'lucide-react';
+import { Calendar as CalendarIcon, MapPin, Users, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { format, addDays } from "date-fns";
+import { format, addMonths } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
@@ -14,13 +14,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 interface SearchBarProps {
   compact?: boolean;
   hideOnNonHomePage?: boolean;
+  onSearch?: (searchData: any) => void;
 }
 
-const SearchBar = ({ compact = false, hideOnNonHomePage = false }: SearchBarProps) => {
+const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: SearchBarProps) => {
   const navigate = useNavigate();
   const [searchLocation, setSearchLocation] = useState('');
   const [searchDestination, setSearchDestination] = useState('');
@@ -29,15 +31,31 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false }: SearchBarProp
   const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
   const [passengerType, setPassengerType] = useState('Adult');
   const [passengerCount, setPassengerCount] = useState(1);
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
   // Mock data for calendar price indicators
   const priceTiers = {
-    low: [1, 5, 6, 12, 13],  // Low price days (green)
-    medium: [2, 7, 8, 14],   // Medium price days (amber)
-    high: [3, 4, 9, 10, 11]  // High price days (red)
+    low: [1, 5, 6, 12, 13, 18, 25],  // Low price days (green)
+    medium: [2, 7, 8, 14, 19, 20, 26, 27],   // Medium price days (amber)
+    high: [3, 4, 9, 10, 11, 15, 16, 21, 22] // High price days (red)
   };
 
   const handleSearch = () => {
+    const searchData = {
+      from: searchLocation,
+      to: searchDestination,
+      departure: departureDate ? format(departureDate, 'yyyy-MM-dd') : '',
+      return: returnDate && tripType === 'round-trip' ? format(returnDate, 'yyyy-MM-dd') : '',
+      tripType,
+      passengers: `${passengerCount} ${passengerType}`
+    };
+
+    if (onSearch) {
+      onSearch(searchData);
+      return;
+    }
+    
+    // Build query parameters
     const params = new URLSearchParams();
     if (searchLocation) params.append('from', searchLocation);
     if (searchDestination) params.append('to', searchDestination);
@@ -66,26 +84,167 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false }: SearchBarProp
     return 'normal';
   };
 
-  // Custom day renderer for the calendar
-  const renderDay = (day: Date) => {
-    const tier = getDayPriceTier(day);
+  // Price indicators for the color-coding legend
+  const priceIndicators = {
+    low: '฿1,000',
+    medium: '฿1,500',
+    high: '฿2,000',
+  };
+
+  // Handle month navigation
+  const goToPreviousMonth = () => {
+    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+
+  const goToNextMonth = () => {
+    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+
+  // Custom component for the calendar header with month navigation
+  const CalendarHeader = ({ currentMonth }: { currentMonth: Date }) => {
+    const nextMonth = addMonths(currentMonth, 1);
+    
     return (
-      <div className={`relative w-full h-full flex items-center justify-center 
-        ${tier === 'low' ? 'bg-green-100' : 
-          tier === 'medium' ? 'bg-amber-100' : 
-          tier === 'high' ? 'bg-red-100' : ''}`}>
-        {day.getDate()}
-        <span className="absolute bottom-0 text-[9px] w-full text-center">
-          {tier === 'low' ? '฿1,000' : 
-           tier === 'medium' ? '฿1,500' : 
-           tier === 'high' ? '฿2,000' : ''}
+      <div className="flex justify-between items-center mb-4 px-2">
+        <button onClick={goToPreviousMonth} className="p-1 rounded-full hover:bg-gray-100">
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        
+        <div className="grid grid-cols-2 flex-grow text-center">
+          <div className="text-sm font-medium">
+            {format(currentMonth, 'MMMM yyyy')}
+          </div>
+          <div className="text-sm font-medium">
+            {format(nextMonth, 'MMMM yyyy')}
+          </div>
+        </div>
+        
+        <button onClick={goToNextMonth} className="p-1 rounded-full hover:bg-gray-100">
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+    );
+  };
+
+  // Custom day renderer for dual calendar
+  const renderDay = (day: Date, isSecondMonth = false) => {
+    const tier = getDayPriceTier(day);
+    const isSelected = 
+      (departureDate && day.getTime() === departureDate.getTime()) ||
+      (returnDate && day.getTime() === returnDate.getTime());
+    
+    const bgColor = 
+      isSelected ? 'bg-purple-600 text-white' : 
+      tier === 'low' ? 'bg-green-100' : 
+      tier === 'medium' ? 'bg-amber-100' : 
+      tier === 'high' ? 'bg-red-100' : 
+      'bg-transparent';
+    
+    return (
+      <div 
+        className={`relative w-full h-full flex flex-col items-center justify-center rounded-md ${bgColor} hover:bg-opacity-80 cursor-pointer text-sm py-1`}
+      >
+        <span>{day.getDate()}</span>
+        <span className="text-[9px]">
+          {tier === 'low' ? priceIndicators.low : 
+           tier === 'medium' ? priceIndicators.medium : 
+           tier === 'high' ? priceIndicators.high : ''}
         </span>
       </div>
     );
   };
 
-  // Calculate the end date for the calendar view (2 weeks from today)
-  const twoWeeksLater = addDays(new Date(), 14);
+  // Custom dual-month calendar component
+  const DualMonthCalendar = ({ selectedDate, onDateSelect, calendarType }: { 
+    selectedDate: Date | undefined, 
+    onDateSelect: (date: Date | undefined) => void,
+    calendarType: 'departure' | 'return'
+  }) => {
+    const nextMonth = addMonths(currentMonth, 1);
+    
+    const handleDayClick = (day: Date) => {
+      // If selecting return date and it's before departure date, don't allow
+      if (calendarType === 'return' && departureDate && day < departureDate) {
+        return;
+      }
+      
+      // If selecting departure date and it's after return date, clear return date
+      if (calendarType === 'departure' && returnDate && day > returnDate) {
+        setReturnDate(undefined);
+      }
+      
+      onDateSelect(day);
+    };
+
+    return (
+      <div className="p-2 bg-white">
+        <CalendarHeader currentMonth={currentMonth} />
+        
+        <div className="flex justify-between mb-2">
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 bg-green-100"></div>
+            <span className="text-xs">Low</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 bg-amber-100"></div>
+            <span className="text-xs">Medium</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 bg-red-100"></div>
+            <span className="text-xs">High</span>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4">
+          {/* First Month */}
+          <div>
+            <div className="grid grid-cols-7 text-center mb-1">
+              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+                <div key={i} className="text-xs font-medium text-gray-500">{day}</div>
+              ))}
+            </div>
+            
+            <CalendarComponent
+              mode="single"
+              selected={selectedDate}
+              onSelect={handleDayClick}
+              month={currentMonth}
+              components={{
+                Day: ({ date }) => renderDay(date),
+              }}
+              showOutsideDays={false}
+              className="pointer-events-auto"
+            />
+          </div>
+          
+          {/* Second Month */}
+          <div>
+            <div className="grid grid-cols-7 text-center mb-1">
+              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+                <div key={i} className="text-xs font-medium text-gray-500">{day}</div>
+              ))}
+            </div>
+            
+            <CalendarComponent
+              mode="single"
+              selected={selectedDate}
+              onSelect={handleDayClick}
+              month={nextMonth}
+              components={{
+                Day: ({ date }) => renderDay(date, true),
+              }}
+              showOutsideDays={false}
+              className="pointer-events-auto"
+            />
+          </div>
+        </div>
+        
+        <div className="mt-4 text-center text-xs text-gray-500">
+          {calendarType === 'departure' ? 'Select your departure date' : 'Select your return date'}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className={`bg-white rounded-xl shadow-lg max-w-4xl mx-auto p-4 border border-gray-200`}>
@@ -134,42 +293,18 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false }: SearchBarProp
                     variant="outline" 
                     className="bg-white w-full h-8 flex justify-start font-normal border text-xs"
                   >
-                    <Calendar className="h-3 w-3 text-gray-400 mr-1" />
+                    <CalendarIcon className="h-3 w-3 text-gray-400 mr-1" />
                     <span className="truncate">
                       {departureDate ? format(departureDate, 'dd MMM') : 'Departure'}
                     </span>
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <div className="p-2 bg-white">
-                    <div className="flex justify-between mb-2">
-                      <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-green-100"></div>
-                        <span className="text-xs">Low</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-amber-100"></div>
-                        <span className="text-xs">Medium</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-red-100"></div>
-                        <span className="text-xs">High</span>
-                      </div>
-                    </div>
-                    <CalendarComponent
-                      mode="single"
-                      selected={departureDate}
-                      onSelect={setDepartureDate}
-                      initialFocus
-                      className="p-3 pointer-events-auto"
-                      components={{
-                        Day: ({ date }) => renderDay(date),
-                      }}
-                      fromDate={new Date()}
-                      toDate={twoWeeksLater}
-                      showOutsideDays={false}
-                    />
-                  </div>
+                <PopoverContent className="w-[600px] p-0" align="start">
+                  <DualMonthCalendar 
+                    selectedDate={departureDate} 
+                    onDateSelect={setDepartureDate}
+                    calendarType="departure"
+                  />
                 </PopoverContent>
               </Popover>
             </div>
@@ -183,48 +318,23 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false }: SearchBarProp
                       variant="outline" 
                       className="bg-white w-full h-8 flex justify-start font-normal border text-xs"
                     >
-                      <Calendar className="h-3 w-3 text-gray-400 mr-1" />
+                      <CalendarIcon className="h-3 w-3 text-gray-400 mr-1" />
                       <span className="truncate">
                         {returnDate ? format(returnDate, 'dd MMM') : 'Return'}
                       </span>
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <div className="p-2 bg-white">
-                      <div className="flex justify-between mb-2">
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 bg-green-100"></div>
-                          <span className="text-xs">Low</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 bg-amber-100"></div>
-                          <span className="text-xs">Medium</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 bg-red-100"></div>
-                          <span className="text-xs">High</span>
-                        </div>
-                      </div>
-                      <CalendarComponent
-                        mode="single"
-                        selected={returnDate}
-                        onSelect={setReturnDate}
-                        initialFocus
-                        disabled={date => !departureDate || date < departureDate}
-                        className="p-3 pointer-events-auto"
-                        components={{
-                          Day: ({ date }) => renderDay(date),
-                        }}
-                        fromDate={departureDate || new Date()}
-                        toDate={twoWeeksLater}
-                        showOutsideDays={false}
-                      />
-                    </div>
+                  <PopoverContent className="w-[600px] p-0" align="start">
+                    <DualMonthCalendar 
+                      selectedDate={returnDate} 
+                      onDateSelect={setReturnDate}
+                      calendarType="return"
+                    />
                   </PopoverContent>
                 </Popover>
               ) : (
                 <div className="bg-gray-100 rounded-lg h-8 flex items-center px-2 text-gray-400">
-                  <Calendar className="h-3 w-3 mr-1" />
+                  <CalendarIcon className="h-3 w-3 mr-1" />
                   <span className="text-xs">One way</span>
                 </div>
               )}
@@ -316,6 +426,19 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false }: SearchBarProp
           </div>
         </div>
       </Tabs>
+
+      {/* Price legend below the search form */}
+      <div className="mt-4 grid grid-cols-3 gap-2">
+        <div className="flex items-center justify-center text-xs bg-green-100 py-1 px-2 rounded">
+          <span className="font-medium mr-1">Low price:</span> {priceIndicators.low}
+        </div>
+        <div className="flex items-center justify-center text-xs bg-amber-100 py-1 px-2 rounded">
+          <span className="font-medium mr-1">Medium price:</span> {priceIndicators.medium}
+        </div>
+        <div className="flex items-center justify-center text-xs bg-red-100 py-1 px-2 rounded">
+          <span className="font-medium mr-1">High price:</span> {priceIndicators.high}
+        </div>
+      </div>
     </div>
   );
 };
