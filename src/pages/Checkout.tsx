@@ -1,13 +1,15 @@
+
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calendar, Clock, Users, QrCode } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Users, QrCode, User } from 'lucide-react';
 import QRCodeGenerator from '@/components/checkout/QRCodeGenerator';
 import GuestDetailsForm from '@/components/checkout/GuestDetailsForm';
 import { useToast } from '@/components/ui/use-toast';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import Auth from './Auth';
 
 interface GuestDetail {
@@ -40,6 +42,7 @@ const Checkout = () => {
   const [guestDetails, setGuestDetails] = useState<GuestDetail[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
   const [ticketId, setTicketId] = useState('');
+  const [guestPhotos, setGuestPhotos] = useState<string[]>([]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -84,12 +87,19 @@ const Checkout = () => {
           return null;
         }
 
-        return data.path;
+        // Get the public URL for the uploaded photo
+        const { data: { publicUrl } } = supabase.storage
+          .from('guest_photos')
+          .getPublicUrl(fileName);
+
+        return publicUrl;
       }
       return null;
     });
 
-    return Promise.all(photoUploads);
+    const photoUrls = await Promise.all(photoUploads);
+    setGuestPhotos(photoUrls.filter(url => url !== null) as string[]);
+    return photoUrls;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -296,12 +306,41 @@ const Checkout = () => {
                 
                 <div className="bg-gray-50 rounded-lg p-4 mb-6">
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Booking Details</h3>
-                  <p className="text-gray-700 mb-1"><strong>Boat:</strong> {bookingDetails.boatName}</p>
-                  <p className="text-gray-700 mb-1"><strong>Date:</strong> {formatDate(bookingDetails.date)}</p>
-                  <p className="text-gray-700 mb-1"><strong>Time:</strong> {bookingDetails.time}</p>
-                  <p className="text-gray-700 mb-1"><strong>Duration:</strong> {bookingDetails.duration} {bookingDetails.duration === 1 ? 'hour' : 'hours'}</p>
-                  <p className="text-gray-700 mb-1"><strong>Guests:</strong> {bookingDetails.guestCount}</p>
+                  <p className="text-gray-700 mb-1"><strong>Boat:</strong> {bookingDetails?.boatName}</p>
+                  <p className="text-gray-700 mb-1"><strong>Date:</strong> {bookingDetails ? formatDate(bookingDetails.date) : ''}</p>
+                  <p className="text-gray-700 mb-1"><strong>Time:</strong> {bookingDetails?.time}</p>
+                  <p className="text-gray-700 mb-1"><strong>Duration:</strong> {bookingDetails?.duration} {bookingDetails?.duration === 1 ? 'hour' : 'hours'}</p>
+                  <p className="text-gray-700 mb-1"><strong>Guests:</strong> {bookingDetails?.guestCount}</p>
                   <p className="text-gray-700"><strong>Ticket ID:</strong> {ticketId}</p>
+                </div>
+                
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center justify-center gap-2">
+                    <User className="h-5 w-5 text-ocean-600" />
+                    Guest Information
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    {guestDetails.map((guest, index) => (
+                      <div key={index} className="bg-white border border-gray-100 rounded-lg p-3 flex flex-col items-center">
+                        <div className="mb-2">
+                          <Avatar className="h-16 w-16">
+                            {guest.photoUrl || guestPhotos[index] ? (
+                              <AvatarImage src={guest.photoUrl || guestPhotos[index]} alt={guest.name} />
+                            ) : (
+                              <AvatarFallback className="bg-ocean-100 text-ocean-600">
+                                {guest.name.charAt(0)}
+                              </AvatarFallback>
+                            )}
+                          </Avatar>
+                        </div>
+                        <div className="text-center">
+                          <p className="font-medium text-gray-900">{guest.name}</p>
+                          <p className="text-sm text-gray-500">Age: {guest.age}</p>
+                          <p className="text-xs text-gray-400">{guest.idType}: {guest.idNumber}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 
                 <div className="mb-6">
@@ -313,10 +352,10 @@ const Checkout = () => {
                     <QRCodeGenerator 
                       value={JSON.stringify({
                         ticketId,
-                        boatName: bookingDetails.boatName,
-                        date: bookingDetails.date,
-                        time: bookingDetails.time,
-                        guestCount: bookingDetails.guestCount,
+                        boatName: bookingDetails?.boatName,
+                        date: bookingDetails?.date,
+                        time: bookingDetails?.time,
+                        guestCount: bookingDetails?.guestCount,
                         guests: guestDetails.map(g => ({
                           name: g.name,
                           age: g.age,

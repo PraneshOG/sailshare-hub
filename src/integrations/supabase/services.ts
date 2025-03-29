@@ -27,6 +27,17 @@ export type Deal = {
   created_at: string;
 }
 
+export type BookingGuest = {
+  id: string;
+  booking_id: string;
+  name: string;
+  age: string;
+  id_type: string;
+  id_number: string;
+  photo_path: string | null;
+  created_at: string;
+}
+
 export async function fetchBoats() {
   const { data, error } = await supabase
     .from('boats')
@@ -51,4 +62,29 @@ export async function fetchDeals() {
   }
   
   return data as Deal[];
+}
+
+export async function fetchBookingWithGuests(bookingId: string) {
+  const { data: booking, error: bookingError } = await supabase
+    .from('bookings')
+    .select('*')
+    .eq('id', bookingId)
+    .single();
+  
+  if (bookingError) {
+    console.error('Error fetching booking:', bookingError);
+    return null;
+  }
+  
+  const { data: guests, error: guestsError } = await supabase
+    .from('booking_guests')
+    .select('*')
+    .eq('booking_id', bookingId);
+  
+  if (guestsError) {
+    console.error('Error fetching booking guests:', guestsError);
+    return { ...booking, guests: [] };
+  }
+  
+  return { ...booking, guests };
 }
