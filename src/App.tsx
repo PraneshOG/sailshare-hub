@@ -3,15 +3,15 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import Index from "./pages/Index";
+import Boats from "./pages/Boats";
 import BoatDetail from "./pages/BoatDetail";
 import Checkout from "./pages/Checkout";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
-import { boat } from "./data/singleBoat";
 
 const queryClient = new QueryClient();
 
@@ -24,7 +24,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/boats" element={<Navigate to={`/boats/${boat.id}`} />} />
+            <Route path="/boats" element={<Boats />} />
             <Route path="/boats/:id" element={<BoatDetail />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/auth" element={<Auth />} />

@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import BoatCard from '@/components/boats/BoatCard';
-import SearchBar from '@/components/home/SearchBar';
+import SearchBar from '@/components/common/SearchBar';
 import MainSidebar from '@/components/layout/MainSidebar';
 import { boats } from '@/data/boats';
 
