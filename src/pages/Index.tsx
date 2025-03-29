@@ -2,6 +2,7 @@
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Hero from '@/components/home/Hero';
+import ExclusiveDeals from '@/components/home/ExclusiveDeals';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import MainSidebar from '@/components/layout/MainSidebar';
 
@@ -17,6 +18,9 @@ const Index = () => {
           <main className="flex-grow">
             {/* Hero Section */}
             <Hero />
+            
+            {/* Exclusive Deals Section */}
+            <ExclusiveDeals />
           </main>
         </div>
         
