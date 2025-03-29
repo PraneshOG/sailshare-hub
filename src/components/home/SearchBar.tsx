@@ -1,10 +1,13 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Calendar, Users, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const SearchBar = () => {
+interface SearchBarProps {
+  onSearch?: (searchData: any) => void;
+}
+
+const SearchBar = ({ onSearch }: SearchBarProps) => {
   const navigate = useNavigate();
   const [location, setLocation] = useState('');
   const [date, setDate] = useState('');
@@ -19,7 +22,17 @@ const SearchBar = () => {
     if (date) params.append('date', date);
     if (guests) params.append('guests', guests);
     
-    navigate(`/boats?${params.toString()}`);
+    // If onSearch prop is provided, call it with search data
+    if (onSearch) {
+      onSearch({
+        location,
+        date,
+        guests: guests ? parseInt(guests.split('-')[0], 10) : undefined
+      });
+    } else {
+      // Otherwise, navigate to boats page with params
+      navigate(`/boats?${params.toString()}`);
+    }
   };
 
   return (
