@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Trash2, PlusCircle, Upload, Camera, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +10,8 @@ interface GuestDetail {
   age: string;
   idType: string;
   idNumber: string;
-  photoUploaded: boolean;
+  photoFile?: File;
+  photoUrl?: string;
 }
 
 interface GuestDetailsFormProps {
@@ -21,15 +21,16 @@ interface GuestDetailsFormProps {
 
 const GuestDetailsForm = ({ guestCount, onGuestDetailsChange }: GuestDetailsFormProps) => {
   const [guestDetails, setGuestDetails] = useState<GuestDetail[]>([
-    { name: '', age: '', idType: 'passport', idNumber: '', photoUploaded: false }
+    { name: '', age: '', idType: 'passport', idNumber: '' }
   ]);
   const [emailInput, setEmailInput] = useState<{ [key: number]: string }>({});
   const [showEmailInput, setShowEmailInput] = useState<{ [key: number]: boolean }>({});
+  const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const { toast } = useToast();
 
   const handleAddGuest = () => {
     if (guestDetails.length < guestCount) {
-      const newGuestDetails = [...guestDetails, { name: '', age: '', idType: 'passport', idNumber: '', photoUploaded: false }];
+      const newGuestDetails = [...guestDetails, { name: '', age: '', idType: 'passport', idNumber: '' }];
       setGuestDetails(newGuestDetails);
       onGuestDetailsChange(newGuestDetails);
     }
@@ -50,11 +51,14 @@ const GuestDetailsForm = ({ guestCount, onGuestDetailsChange }: GuestDetailsForm
     onGuestDetailsChange(newGuestDetails);
   };
 
-  const handlePhotoUpload = (index: number) => {
-    // In a real app, this would handle the actual photo upload
-    // For now, we'll just simulate a successful upload
+  const handlePhotoUpload = (index: number, file: File) => {
     const newGuestDetails = [...guestDetails];
-    newGuestDetails[index] = { ...newGuestDetails[index], photoUploaded: true };
+    const photoUrl = URL.createObjectURL(file);
+    newGuestDetails[index] = { 
+      ...newGuestDetails[index], 
+      photoFile: file,
+      photoUrl 
+    };
     setGuestDetails(newGuestDetails);
     onGuestDetailsChange(newGuestDetails);
   };
@@ -70,23 +74,17 @@ const GuestDetailsForm = ({ guestCount, onGuestDetailsChange }: GuestDetailsForm
       return;
     }
 
-    // In a real app, this would send an email with a link to upload photo
     toast({
       title: "Verification Email Sent",
       description: `An email has been sent to ${email} with instructions to upload photo ID.`,
       variant: "default"
     });
 
-    // For demo purposes, we'll simulate the email being sent and a photo being uploaded
-    setTimeout(() => {
-      const newGuestDetails = [...guestDetails];
-      newGuestDetails[index] = { ...newGuestDetails[index], photoUploaded: true };
-      setGuestDetails(newGuestDetails);
-      onGuestDetailsChange(newGuestDetails);
+    setShowEmailInput(prev => ({ ...prev, [index]: false }));
+  };
 
-      // Hide the email input once sent
-      setShowEmailInput(prev => ({ ...prev, [index]: false }));
-    }, 1500);
+  const triggerFileInput = (index: number) => {
+    fileInputRefs.current[index]?.click();
   };
 
   return (
@@ -179,21 +177,29 @@ const GuestDetailsForm = ({ guestCount, onGuestDetailsChange }: GuestDetailsForm
           <div className="space-y-2">
             <Label>Photo Verification</Label>
             <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50">
-              {guest.photoUploaded ? (
+              <input 
+                type="file" 
+                accept="image/*" 
+                ref={(el) => fileInputRefs.current[index] = el}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handlePhotoUpload(index, file);
+                }}
+                className="hidden" 
+              />
+              
+              {guest.photoUrl ? (
                 <div className="text-center">
-                  <div className="flex justify-center mb-2">
-                    <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-700 mb-2">Photo uploaded successfully</p>
+                  <img 
+                    src={guest.photoUrl} 
+                    alt="Guest" 
+                    className="h-32 w-32 object-cover rounded-full mb-4"
+                  />
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => handlePhotoUpload(index)}
+                    onClick={() => triggerFileInput(index)}
                   >
                     Replace Photo
                   </Button>
@@ -239,7 +245,7 @@ const GuestDetailsForm = ({ guestCount, onGuestDetailsChange }: GuestDetailsForm
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => handlePhotoUpload(index)}
+                        onClick={() => triggerFileInput(index)}
                         className="flex items-center gap-1"
                       >
                         <Upload className="h-4 w-4" />
@@ -249,7 +255,7 @@ const GuestDetailsForm = ({ guestCount, onGuestDetailsChange }: GuestDetailsForm
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => handlePhotoUpload(index)}
+                        onClick={() => triggerFileInput(index)}
                         className="flex items-center gap-1"
                       >
                         <Camera className="h-4 w-4" />

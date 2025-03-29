@@ -92,6 +92,89 @@ export type Database = {
         }
         Relationships: []
       }
+      booking_guests: {
+        Row: {
+          age: string
+          booking_id: string | null
+          created_at: string | null
+          id: string
+          id_number: string
+          id_type: string
+          name: string
+          photo_path: string | null
+        }
+        Insert: {
+          age: string
+          booking_id?: string | null
+          created_at?: string | null
+          id?: string
+          id_number: string
+          id_type: string
+          name: string
+          photo_path?: string | null
+        }
+        Update: {
+          age?: string
+          booking_id?: string | null
+          created_at?: string | null
+          id?: string
+          id_number?: string
+          id_type?: string
+          name?: string
+          photo_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_guests_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          boat_id: string
+          boat_name: string
+          created_at: string | null
+          date: string
+          duration: number
+          guest_count: number
+          id: string
+          ticket_id: string
+          time: string
+          total_price: number
+          user_id: string | null
+        }
+        Insert: {
+          boat_id: string
+          boat_name: string
+          created_at?: string | null
+          date: string
+          duration: number
+          guest_count: number
+          id?: string
+          ticket_id: string
+          time: string
+          total_price: number
+          user_id?: string | null
+        }
+        Update: {
+          boat_id?: string
+          boat_name?: string
+          created_at?: string | null
+          date?: string
+          duration?: number
+          guest_count?: number
+          id?: string
+          ticket_id?: string
+          time?: string
+          total_price?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           address: string

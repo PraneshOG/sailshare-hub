@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
@@ -7,13 +8,15 @@ import { ArrowLeft, Calendar, Clock, Users, QrCode } from 'lucide-react';
 import QRCodeGenerator from '@/components/checkout/QRCodeGenerator';
 import GuestDetailsForm from '@/components/checkout/GuestDetailsForm';
 import { useToast } from '@/components/ui/use-toast';
+import Auth from './Auth';
 
 interface GuestDetail {
   name: string;
   age: string;
   idType: string;
   idNumber: string;
-  photoUploaded: boolean;
+  photoFile?: File;
+  photoUrl?: string;
 }
 
 interface BookingDetails {
@@ -32,10 +35,28 @@ const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [user, setUser] = useState(null);
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
   const [guestDetails, setGuestDetails] = useState<GuestDetail[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
   const [ticketId, setTicketId] = useState('');
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+
+    checkUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     if (location.state) {
@@ -45,14 +66,40 @@ const Checkout = () => {
     }
   }, [location, navigate]);
 
-  const handleGuestDetailsChange = (details: GuestDetail[]) => {
-    setGuestDetails(details);
+  const uploadGuestPhotos = async (guestDetails: GuestDetail[], bookingId: string) => {
+    const photoUploads = guestDetails.map(async (guest, index) => {
+      if (guest.photoFile) {
+        const fileExt = guest.photoFile.name.split('.').pop();
+        const fileName = `${bookingId}_guest_${index}.${fileExt}`;
+        const { data, error } = await supabase.storage
+          .from('guest_photos')
+          .upload(fileName, guest.photoFile);
+
+        if (error) {
+          console.error('Error uploading photo:', error);
+          return null;
+        }
+
+        return data.path;
+      }
+      return null;
+    });
+
+    return Promise.all(photoUploads);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate all guests have required details
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to complete your booking.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!bookingDetails) return;
     
     const allGuestsValid = guestDetails.length === bookingDetails.guestCount &&
@@ -60,7 +107,7 @@ const Checkout = () => {
         guest.name.trim() !== '' && 
         guest.age.trim() !== '' && 
         guest.idNumber.trim() !== '' &&
-        guest.photoUploaded
+        guest.photoFile
       );
     
     if (!allGuestsValid) {
@@ -72,14 +119,57 @@ const Checkout = () => {
       return;
     }
     
-    // Simulate booking process
-    setTimeout(() => {
-      // Generate a random ticket ID
+    try {
+      // Insert booking
       const randomTicketId = 'SB-' + Math.floor(100000 + Math.random() * 900000);
+      const { data: bookingData, error: bookingError } = await supabase
+        .from('bookings')
+        .insert({
+          user_id: user.id,
+          boat_id: bookingDetails.boatId,
+          boat_name: bookingDetails.boatName,
+          date: bookingDetails.date,
+          time: bookingDetails.time,
+          duration: bookingDetails.duration,
+          guest_count: bookingDetails.guestCount,
+          total_price: bookingDetails.totalPrice,
+          ticket_id: randomTicketId
+        })
+        .select('id')
+        .single();
+
+      if (bookingError) throw bookingError;
+
+      // Upload guest photos
+      const photoPaths = await uploadGuestPhotos(guestDetails, bookingData.id);
+
+      // Insert guest details with photo paths
+      const guestInserts = guestDetails.map((guest, index) => ({
+        booking_id: bookingData.id,
+        name: guest.name,
+        age: guest.age,
+        id_type: guest.idType,
+        id_number: guest.idNumber,
+        photo_path: photoPaths[index]
+      }));
+
+      const { error: guestsError } = await supabase
+        .from('booking_guests')
+        .insert(guestInserts);
+
+      if (guestsError) throw guestsError;
+
       setTicketId(randomTicketId);
       setIsCompleted(true);
       window.scrollTo(0, 0);
-    }, 1500);
+    } catch (error) {
+      console.error('Booking submission error:', error);
+      toast({
+        title: "Booking Failed",
+        description: "There was an error processing your booking. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -87,27 +177,8 @@ const Checkout = () => {
     return new Date(dateString).toLocaleDateString('en-IN', options);
   };
 
-  if (!bookingDetails) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="flex-grow flex items-center justify-center p-4">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">No booking information found</h2>
-            <p className="text-gray-600 mb-6">Please select a boat to begin the booking process.</p>
-            <Button 
-              variant="default" 
-              className="bg-ocean-600 hover:bg-ocean-700"
-              onClick={() => navigate('/boats')}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Boats
-            </Button>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
+  if (!user) {
+    return <Auth />;
   }
 
   return (
