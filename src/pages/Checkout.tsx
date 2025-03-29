@@ -66,6 +66,10 @@ const Checkout = () => {
     }
   }, [location, navigate]);
 
+  const handleGuestDetailsChange = (details: GuestDetail[]) => {
+    setGuestDetails(details);
+  };
+
   const uploadGuestPhotos = async (guestDetails: GuestDetail[], bookingId: string) => {
     const photoUploads = guestDetails.map(async (guest, index) => {
       if (guest.photoFile) {
@@ -211,14 +215,14 @@ const Checkout = () => {
                     
                     <form onSubmit={handleSubmit} className="space-y-6">
                       <GuestDetailsForm 
-                        guestCount={bookingDetails.guestCount} 
+                        guestCount={bookingDetails?.guestCount || 0} 
                         onGuestDetailsChange={handleGuestDetailsChange}
                       />
                       
                       <Button 
                         type="submit"
                         className="w-full bg-ocean-600 hover:bg-ocean-700 text-white font-medium py-3 rounded-lg transition-all"
-                        disabled={guestDetails.length !== bookingDetails.guestCount}
+                        disabled={guestDetails.length !== bookingDetails?.guestCount}
                       >
                         Complete Booking
                       </Button>
