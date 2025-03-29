@@ -1,5 +1,5 @@
 
-import SearchBar from '@/components/common/SearchBar';
+import SearchBar from '@/components/home/SearchBar';
 
 const Hero = () => {
   return (
@@ -23,7 +23,7 @@ const Hero = () => {
           
           {/* Search Box */}
           <div className="max-w-3xl">
-            <SearchBar hideOnNonHomePage={true} />
+            <SearchBar />
           </div>
         </div>
       </div>

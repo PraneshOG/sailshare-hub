@@ -1,7 +1,6 @@
 
 import { useEffect, useState } from 'react';
 import { fetchBoats, Boat } from '@/integrations/supabase/services';
-import BoatCard from '@/components/boats/BoatCard';
 
 const FeaturedBoats = () => {
   const [featuredBoat, setFeaturedBoat] = useState<Boat | null>(null);
