@@ -8,9 +8,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger
 } from "@/components/ui/sidebar";
-import { Plane, Building, Car, Globe, Heart, X } from "lucide-react";
+import { Plane, Building, Car, Globe, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const MainSidebar = () => {
@@ -46,12 +45,6 @@ const MainSidebar = () => {
   return (
     <Sidebar variant="inset" collapsible="offcanvas">
       <SidebarContent className="pt-16">
-        <div className="absolute right-4 top-4 md:hidden">
-          <SidebarTrigger>
-            <X className="h-6 w-6" />
-          </SidebarTrigger>
-        </div>
-        
         <SidebarGroup>
           <SidebarGroupLabel>Travel</SidebarGroupLabel>
           <SidebarGroupContent>

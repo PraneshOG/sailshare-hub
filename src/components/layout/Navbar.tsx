@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, Ship } from 'lucide-react';
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -30,18 +29,13 @@ const Navbar = () => {
       }`}
     >
       <nav className="container mx-auto px-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <SidebarTrigger className="md:hidden">
-            <Menu className="h-6 w-6 text-white" />
-          </SidebarTrigger>
-          <Link 
-            to="/" 
-            className="flex items-center gap-2 text-2xl font-bold text-white transition-all duration-300"
-          >
-            <Ship className="h-8 w-8 text-orange-500" />
-            <span className="hidden sm:inline gradient-text bg-gradient-to-r from-red-500 to-orange-500 text-transparent bg-clip-text">SailShare</span>
-          </Link>
-        </div>
+        <Link 
+          to="/" 
+          className="flex items-center gap-2 text-2xl font-bold text-white transition-all duration-300"
+        >
+          <Ship className="h-8 w-8 text-orange-500" />
+          <span className="hidden sm:inline gradient-text bg-gradient-to-r from-red-500 to-orange-500 text-transparent bg-clip-text">SailShare</span>
+        </Link>
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-4">
