@@ -2,7 +2,6 @@
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Hero from '@/components/home/Hero';
-import FeaturedBoats from '@/components/home/FeaturedBoats';
 import ExclusiveDeals from '@/components/home/ExclusiveDeals';
 
 const Index = () => {
@@ -17,8 +16,7 @@ const Index = () => {
         {/* Exclusive Deals Section */}
         <ExclusiveDeals />
         
-        {/* Featured Boats Section */}
-        <FeaturedBoats />
+        {/* Removed the FeaturedBoats section as requested */}
       </main>
       
       <Footer />

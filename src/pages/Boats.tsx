@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
@@ -7,7 +6,6 @@ import BoatCard from '@/components/boats/BoatCard';
 import { fetchBoats, Boat } from '@/integrations/supabase/services';
 import { Sliders, Search, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import SearchBar from '@/components/common/SearchBar';
 
 const BoatsPage = () => {
   const location = useLocation();
@@ -78,12 +76,7 @@ const BoatsPage = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-indigo-900 to-purple-900 text-white">
       <Navbar />
       
-      {/* Persistent SearchBar */}
-      <div className="pt-24 px-4 bg-indigo-900">
-        <SearchBar compact={true} />
-      </div>
-      
-      <main className="flex-grow pt-8 pb-20">
+      <main className="flex-grow pt-24 pb-20">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
             <div>

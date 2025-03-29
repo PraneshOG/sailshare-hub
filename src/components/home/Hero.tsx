@@ -1,5 +1,4 @@
 
-import { Link } from 'react-router-dom';
 import SearchBar from '@/components/common/SearchBar';
 
 const Hero = () => {
@@ -17,13 +16,16 @@ const Hero = () => {
       
       {/* Content */}
       <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-3xl">
+        <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
             Where do you want to go?
           </h1>
           
-          {/* Search Box */}
-          <SearchBar />
+          {/* Colored Box Container */}
+          <div className="bg-blue-100/60 backdrop-blur-md p-6 rounded-xl shadow-lg">
+            {/* Search Box */}
+            <SearchBar hideOnNonHomePage={true} />
+          </div>
         </div>
       </div>
     </section>

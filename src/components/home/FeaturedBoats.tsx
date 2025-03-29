@@ -2,12 +2,9 @@
 import { useEffect, useState } from 'react';
 import { fetchBoats, Boat } from '@/integrations/supabase/services';
 import BoatCard from '@/components/boats/BoatCard';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Link } from 'react-router-dom';
 
 const FeaturedBoats = () => {
-  const [featuredBoats, setFeaturedBoats] = useState<Boat[]>([]);
+  const [featuredBoat, setFeaturedBoat] = useState<Boat | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -15,73 +12,18 @@ const FeaturedBoats = () => {
       setIsLoading(true);
       const boats = await fetchBoats();
       
-      // Take the first 3 boats as featured
-      const featured = boats.slice(0, 3);
-      setFeaturedBoats(featured);
+      // Take only the first boat
+      if (boats.length > 0) {
+        setFeaturedBoat(boats[0]);
+      }
       setIsLoading(false);
     };
 
     loadBoats();
   }, []);
 
-  return (
-    <section id="featured-boats" className="py-16 bg-gradient-to-b from-indigo-900 to-purple-900 text-white">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-10">
-          <div>
-            <span className="text-red-500 text-sm font-semibold tracking-wider uppercase">Featured</span>
-            <h2 className="text-3xl font-bold text-white mt-1">Discover Premium Boats in Phuket</h2>
-          </div>
-          <div className="hidden sm:flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full bg-blue-600 border-blue-500 text-white hover:bg-blue-700"
-              aria-label="Previous"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full bg-blue-600 border-blue-500 text-white hover:bg-blue-700"
-              aria-label="Next"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-
-        {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[...Array(3)].map((_, index) => (
-              <div key={index} className="bg-indigo-800/40 rounded-xl p-4 h-80 animate-pulse"></div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredBoats.map((boat) => (
-              <BoatCard 
-                key={boat.id} 
-                boat={boat}
-              />
-            ))}
-          </div>
-        )}
-
-        <div className="mt-12 text-center">
-          <Link to="/boats">
-            <Button 
-              className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-6 rounded-lg transition-all inline-flex items-center gap-2"
-            >
-              View All Boats
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
+  // We're hiding this component completely as requested by user
+  return null;
 };
 
 export default FeaturedBoats;
