@@ -62,7 +62,6 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
               placeholder="Start Date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              // In a real app, you'd use a date picker
               onClick={() => console.log('Open date picker')}
             />
           </div>
