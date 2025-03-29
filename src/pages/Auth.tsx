@@ -1,14 +1,22 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
-import { Mail, Lock, User, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 const Auth = () => {
   const [isSignIn, setIsSignIn] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get the redirect URL from the location state or default to '/'
+  const redirectTo = location.state?.from || '/';
   
   // Form states
   const [email, setEmail] = useState('');
@@ -16,27 +24,117 @@ const Auth = () => {
   const [name, setName] = useState('');
   
   // Sign In with Email
-  const handleAuth = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    // This would connect to Supabase Auth in the real implementation
-    console.log('Auth data:', { email, password, name, isSignIn });
-    alert(`${isSignIn ? 'Sign In' : 'Sign Up'} functionality would connect to Supabase Auth in a real implementation`);
+    setIsLoading(true);
+    
+    try {
+      if (isSignIn) {
+        // Sign In
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Welcome back!",
+          description: "You've successfully signed in.",
+        });
+        
+        navigate(redirectTo);
+      } else {
+        // Sign Up
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: name,
+            },
+          },
+        });
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Account created!",
+          description: "Please check your email to confirm your account.",
+        });
+        
+        // Auto-login if email verification is disabled
+        if (data.session) {
+          navigate(redirectTo);
+        }
+      }
+    } catch (error: any) {
+      toast({
+        title: "Authentication error",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   // Sign In with Google
-  const handleGoogleAuth = () => {
-    // This would connect to Supabase Auth with Google in the real implementation
-    alert('Google Sign In would connect to Supabase Auth in a real implementation');
+  const handleGoogleAuth = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: "Google Sign In failed",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
+    }
   };
   
   // Sign In with Magic Link
-  const handleMagicLink = () => {
+  const handleMagicLink = async () => {
     if (!email) {
-      alert('Please enter your email address');
+      toast({
+        title: "Email required",
+        description: "Please enter your email address",
+        variant: "destructive",
+      });
       return;
     }
-    // This would connect to Supabase Auth with Magic Link in the real implementation
-    alert(`Magic Link would be sent to ${email} in a real implementation`);
+    
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Magic link sent!",
+        description: `Check your email (${email}) for the login link`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to send magic link",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -147,8 +245,16 @@ const Auth = () => {
                 <Button 
                   type="submit"
                   className="w-full bg-ocean-600 hover:bg-ocean-700 text-white font-medium py-2 rounded-lg transition-all"
+                  disabled={isLoading}
                 >
-                  {isSignIn ? 'Sign In' : 'Create Account'}
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {isSignIn ? 'Signing In...' : 'Creating Account...'}
+                    </>
+                  ) : (
+                    isSignIn ? 'Sign In' : 'Create Account'
+                  )}
                 </Button>
               </form>
               
@@ -158,10 +264,20 @@ const Auth = () => {
                   <button 
                     type="button"
                     onClick={handleMagicLink}
+                    disabled={isLoading}
                     className="w-full text-center text-ocean-600 hover:text-ocean-700 text-sm font-medium flex items-center justify-center gap-1"
                   >
-                    Sign in with Magic Link
-                    <ArrowRight className="h-3 w-3" />
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                        Sending link...
+                      </>
+                    ) : (
+                      <>
+                        Sign in with Magic Link
+                        <ArrowRight className="h-3 w-3" />
+                      </>
+                    )}
                   </button>
                 </div>
               )}
@@ -181,6 +297,7 @@ const Auth = () => {
                 <button 
                   type="button"
                   onClick={handleGoogleAuth}
+                  disabled={isLoading}
                   className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors"
                 >
                   <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
