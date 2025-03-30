@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Calendar, Users, MapPin } from 'lucide-react';
@@ -15,33 +14,49 @@ const SearchBar = () => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [guests, setGuests] = useState('');
 
-  // Function to get price levels for dates
-  const getPriceTiers = (day: number) => {
-    // Low price days (green)
-    if ([2, 3, 4, 5, 30, 31].includes(day)) {
-      return "low";
-    } 
-    // Medium price days (amber)
-    else if ([6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 23, 24, 25, 26, 27, 28].includes(day)) {
-      return "medium";
-    } 
-    // High price days (purple)
-    else if ([1, 22, 29].includes(day)) {
-      return "high";
-    }
-    return "";
+  // Function to get random price tiers for dates
+  const getPriceTiers = () => {
+    const tiers = ["low", "medium", "high"];
+    return tiers[Math.floor(Math.random() * tiers.length)];
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Build query parameters
     const params = new URLSearchParams();
     if (location) params.append('location', location);
     if (date) params.append('date', format(date, 'yyyy-MM-dd'));
     if (guests) params.append('guests', guests);
-    
+
     navigate(`/boats?${params.toString()}`);
+  };
+
+  // Define a mapping of price tiers to colors
+  const tierColors = {
+    low: "#12B981",      // Green
+    medium: "#F8CB45",   // Amber
+    high: "#FF6B6B",    // Red (Corrected from Purple)
+  };
+
+  // Get unique price tiers used in the current month
+  const getUniquePriceTiers = (month: Date) => {
+    const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+    const uniqueTiers = new Set<string>();
+
+    for (let i = 1; i <= daysInMonth; i++) {
+      uniqueTiers.add(getPriceTiers());
+    }
+
+    return Array.from(uniqueTiers);
+  };
+
+  // State to store unique price tiers
+  const [uniquePriceTiers, setUniquePriceTiers] = useState<string[]>([]);
+
+  // Handler for month change in the calendar
+  const handleMonthChange = (month: Date) => {
+    setUniquePriceTiers(getUniquePriceTiers(month));
   };
 
   return (
@@ -52,15 +67,15 @@ const SearchBar = () => {
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <MapPin className="h-5 w-5 text-gray-400" />
             </div>
-            <input 
-              type="text" 
+            <input
+              type="text"
               className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-ocean-500/50 focus:border-transparent transition-all"
               placeholder="Where to?"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
           </div>
-          
+
           <div className="relative">
             <Popover>
               <PopoverTrigger asChild>
@@ -80,15 +95,16 @@ const SearchBar = () => {
                     onSelect={setDate}
                     initialFocus
                     className="p-3 pointer-events-auto"
+                    onMonthChange={handleMonthChange} // Call handleMonthChange when the month changes
                     modifiers={{
-                      low: (date) => ["low"].includes(getPriceTiers(date.getDate())),
-                      medium: (date) => ["medium"].includes(getPriceTiers(date.getDate())),
-                      high: (date) => ["high"].includes(getPriceTiers(date.getDate()))
+                      low: (date) => getPriceTiers() === "low",
+                      medium: (date) => getPriceTiers() === "medium",
+                      high: (date) => getPriceTiers() === "high"
                     }}
                     modifiersClassNames={{
                       low: "bg-[#12B981]/20 border-0 text-black font-medium",
                       medium: "bg-[#F8CB45]/20 border-0 text-black font-medium",
-                      high: "bg-[#8A3FFC] border-0 text-white font-medium"
+                      high: "bg-[#FF6B6B]/20 border-0 text-black font-medium"
                     }}
                     classNames={{
                       day_selected: "bg-ocean-600 text-white hover:bg-ocean-500 hover:text-white focus:bg-ocean-600 focus:text-white",
@@ -107,26 +123,22 @@ const SearchBar = () => {
                   />
                   {/* Price Legend */}
                   <div className="p-3 border-t border-gray-200 flex items-center justify-between">
-                    <div className="flex items-center px-2 py-1 bg-[#12B981]/20 rounded">
-                      <span className="text-xs">₹12481+</span>
-                    </div>
-                    <div className="flex items-center px-2 py-1 bg-[#F8CB45]/20 rounded">
-                      <span className="text-xs">₹16133+</span>
-                    </div>
-                    <div className="flex items-center px-2 py-1 bg-[#FF6B6B]/20 rounded">
-                      <span className="text-xs">₹23954+</span>
-                    </div>
+                    {Object.entries(tierColors).map(([tier, color]) => (
+                      <div key={tier} className={`flex items-center px-2 py-1 bg-[${color}]/20 rounded`}>
+                        <span className="text-xs">₹{Math.floor(Math.random() * (30000 - 10000 + 1)) + 10000}+</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </PopoverContent>
             </Popover>
           </div>
-          
+
           <div className="relative">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <Users className="h-5 w-5 text-gray-400" />
             </div>
-            <select 
+            <select
               className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-ocean-500/50 focus:border-transparent transition-all appearance-none bg-white"
               value={guests}
               onChange={(e) => setGuests(e.target.value)}
@@ -138,9 +150,9 @@ const SearchBar = () => {
               <option value="11+">11+ guests</option>
             </select>
           </div>
-          
-          <Button 
-            type="submit" 
+
+          <Button
+            type="submit"
             className="bg-ocean-600 hover:bg-ocean-700 text-white font-medium py-2 px-6 rounded-lg transition-all flex items-center justify-center gap-2"
           >
             <Search className="h-4 w-4" />
