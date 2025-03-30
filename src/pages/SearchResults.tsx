@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { fetchBoats, Boat, JourneyDetails } from '@/integrations/supabase/services';
+import SearchBar from '@/components/SearchBar'; // ADDED THIS LINE
+import { fetchBoats, Boat } from '@/integrations/supabase/services';
 import { AlertCircle, ArrowRight, Calendar, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,7 +17,6 @@ const SearchResultsPage = () => {
   const [boats, setBoats] = useState<Boat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDeparture, setSelectedDeparture] = useState<string | null>(null);
-  const [selectedDepartureDetails, setSelectedDepartureDetails] = useState<JourneyDetails | null>(null);
   
   // Parse query parameters
   const params = new URLSearchParams(location.search);
@@ -77,16 +76,40 @@ const SearchResultsPage = () => {
   }, [location.search, toast]);
   
   // Calculate total passengers
-  const totalPassengers = passengers.reduce((sum, p) => sum + p.count, 0) || 1;
+  const totalPassengers = passengers.reduce((sum, p) => sum + p.count, 0);
 
+  const handleSelectJourney = (index: number, journeyType: 'departure' | 'return') => {
+    // For departure journey in round trip, just save the selection
+    if (tripType === 'round-trip' && journeyType === 'departure') {
+      setSelectedDeparture(`journey-${index}`);
+      return;
+    }
+    
+    // For one-way or return journey, proceed to checkout
+    const timeDetails = generateTimeDetails(index);
+    
+    // Create booking details to pass to checkout without boat name
+    const bookingDetails = {
+      boatId: boats.length > 0 ? boats[0].id : "", // Just use the first boat
+      boatName: "", // No longer showing boat name
+      boatImage: boats.length > 0 ? boats[0].images[0] : "",
+      date: journeyType === 'return' ? returnParam : departureParam,
+      time: timeDetails.departureTime,
+      duration: 4, // Default duration in hours
+      guestCount: totalPassengers,
+      price: boats.length > 0 ? boats[0].price_per_hour : 0,
+      totalPrice: (boats.length > 0 ? boats[0].price_per_hour : 0) * 4 + 800 // 4 hours + fees
+    };
+    
+    navigate('/checkout', { state: bookingDetails });
+  };
+  
+  // Generate pseudo-random departure/arrival times based on index
   const generateTimeDetails = (index: number) => {
-    // Generate consistent departure and arrival times
-    const hour = 8 + (index * 2) % 10;
-    const period = hour >= 12 ? "PM" : "AM";
-    const departureHour = hour % 12 || 12;
-    const arrivalHour = (departureHour + 2) % 12 || 12;
-    const departureTime = `${departureHour}:00 ${period}`;
-    const arrivalTime = `${arrivalHour}:00 ${period}`;
+    const hour = 7 + (index * 3) % 12;
+    const period = hour > 11 ? "PM" : "AM";
+    const departureTime = `${hour === 0 ? 12 : hour}:00 ${period}`;
+    const arrivalTime = `${(hour + 2) % 12 === 0 ? 12 : (hour + 2) % 12}:30 ${period}`;
     
     return {
       departureTime,
@@ -94,90 +117,13 @@ const SearchResultsPage = () => {
     };
   };
 
-  const calculateJourneyPrice = (index: number, totalPassengers: number) => {
-    // Base price between 400-800 baht per hour per person
-    const hourlyRate = 600 + (index * 50); 
-    const duration = 4; // 4 hours standard duration
-    const basePrice = hourlyRate * duration;
-    const personPrice = basePrice / totalPassengers;
-    
-    return {
-      basePrice,
-      personPrice,
-      hourlyRate,
-      totalForAllPassengers: basePrice
-    };
-  };
-
-  const handleSelectJourney = (index: number, journeyType: 'departure' | 'return') => {
-    const { departureTime, arrivalTime } = generateTimeDetails(index);
-    const priceDetails = calculateJourneyPrice(index, totalPassengers);
-    
-    // For departure journey in round trip, save the selection and details
-    if (tripType === 'round-trip' && journeyType === 'departure') {
-      const departureJourney = {
-        date: departureParam,
-        time: departureTime,
-        from: fromParam,
-        to: toParam,
-        price: priceDetails.hourlyRate,
-        duration: 4, // 4 hours standard duration
-        departureTime,
-        arrivalTime
-      };
-      
-      setSelectedDeparture(`journey-${index}`);
-      setSelectedDepartureDetails(departureJourney);
-      return;
-    }
-    
-    // Prepare booking details for checkout
-    const currentPrice = priceDetails.basePrice;
-    const cleaningFee = 500;
-    const serviceFee = 300;
-    
-    // Create booking details
-    const bookingDetails = {
-      tripType: tripType,
-      departure: selectedDepartureDetails || {
-        date: departureParam,
-        time: departureTime,
-        from: fromParam,
-        to: toParam,
-        price: priceDetails.hourlyRate,
-        duration: 4,
-        departureTime,
-        arrivalTime
-      },
-      return: journeyType === 'return' ? {
-        date: returnParam,
-        time: departureTime,
-        from: toParam,
-        to: fromParam,
-        price: priceDetails.hourlyRate,
-        duration: 4,
-        departureTime,
-        arrivalTime
-      } : null,
-      totalPrice: tripType === 'round-trip' ? 
-        (currentPrice * 2 + cleaningFee + serviceFee) : 
-        (currentPrice + cleaningFee + serviceFee),
-      guestCount: totalPassengers,
-      boatId: boats.length > 0 ? boats[0].id : "",
-      cleaningFee,
-      serviceFee,
-      journeyPrice: currentPrice
-    };
-    
-    navigate('/checkout', { state: bookingDetails });
-  };
-  
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-indigo-900 to-purple-900">
       <Navbar />
       
       <main className="flex-grow pt-24 pb-20">
         <div className="container mx-auto px-4">
+          <SearchBar /> {/* ADDED THIS LINE */}
           {/* Search summary */}
           <div className="bg-indigo-800/50 rounded-xl p-4 mb-6 shadow-lg border border-indigo-700/30">
             <div className="flex flex-col md:flex-row justify-between items-center">
@@ -255,7 +201,6 @@ const SearchResultsPage = () => {
                   <div className="space-y-4">
                     {[...Array(5)].map((_, index) => {
                       const { departureTime, arrivalTime } = generateTimeDetails(index);
-                      const priceInfo = calculateJourneyPrice(index, totalPassengers);
                       
                       return (
                         <div 
@@ -275,7 +220,7 @@ const SearchResultsPage = () => {
                                   </div>
                                   
                                   <div className="flex flex-col items-center">
-                                    <div className="text-xs text-gray-500">4h 00m</div>
+                                    <div className="text-xs text-gray-500">2h 30m</div>
                                     <div className="relative w-16 md:w-24">
                                       <div className="border-t border-gray-300 absolute top-1/2 w-full"></div>
                                       <ArrowRight className="h-4 w-4 text-gray-400 absolute top-1/2 right-0 transform -translate-y-1/2" />
@@ -304,7 +249,7 @@ const SearchResultsPage = () => {
                             <div className="col-span-4 lg:col-span-3 flex flex-col items-end justify-between">
                               <div className="text-right">
                                 <p className="text-sm text-gray-500">From</p>
-                                <p className="text-xl font-semibold">฿{Math.round(priceInfo.personPrice).toLocaleString()}</p>
+                                <p className="text-xl font-semibold">฿{(1000 + index * 200).toLocaleString()}</p>
                                 <p className="text-sm text-gray-500">per person</p>
                               </div>
                               
@@ -344,7 +289,6 @@ const SearchResultsPage = () => {
                     <div className="space-y-4">
                       {[...Array(3)].map((_, index) => {
                         const { departureTime, arrivalTime } = generateTimeDetails(index + 2);
-                        const priceInfo = calculateJourneyPrice(index + 2, totalPassengers);
                         
                         return (
                           <div 
@@ -362,7 +306,7 @@ const SearchResultsPage = () => {
                                     </div>
                                     
                                     <div className="flex flex-col items-center">
-                                      <div className="text-xs text-gray-500">4h 00m</div>
+                                      <div className="text-xs text-gray-500">2h 30m</div>
                                       <div className="relative w-16 md:w-24">
                                         <div className="border-t border-gray-300 absolute top-1/2 w-full"></div>
                                         <ArrowRight className="h-4 w-4 text-gray-400 absolute top-1/2 right-0 transform -translate-y-1/2" />
@@ -391,7 +335,7 @@ const SearchResultsPage = () => {
                               <div className="col-span-4 lg:col-span-3 flex flex-col items-end justify-between">
                                 <div className="text-right">
                                   <p className="text-sm text-gray-500">From</p>
-                                  <p className="text-xl font-semibold">฿{Math.round(priceInfo.personPrice).toLocaleString()}</p>
+                                  <p className="text-xl font-semibold">฿{(800 + index * 300).toLocaleString()}</p>
                                   <p className="text-sm text-gray-500">per person</p>
                                 </div>
                                 
