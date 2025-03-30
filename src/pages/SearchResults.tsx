@@ -1,8 +1,8 @@
+
 import { useState, useEffect } from 'react';
-import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import BoatCard from '@/components/boats/BoatCard';
 import { fetchBoats, Boat } from '@/integrations/supabase/services';
 import { Sliders, Search, AlertCircle, Ship, ArrowRight, Calendar, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -76,6 +76,23 @@ const SearchResultsPage = () => {
   
   // Calculate total passengers
   const totalPassengers = passengers.reduce((sum, p) => sum + p.count, 0);
+
+  const handleSelectBoat = (boat) => {
+    // Create booking details to pass to checkout
+    const bookingDetails = {
+      boatId: boat.id,
+      boatName: boat.name,
+      boatImage: boat.images[0],
+      date: departureParam || new Date().toISOString().split('T')[0],
+      time: "09:00 AM", // Default time, in real app this would be selected
+      duration: 4, // Default duration in hours
+      guestCount: totalPassengers,
+      price: boat.price_per_hour,
+      totalPrice: boat.price_per_hour * 4 + 800 // 4 hours + fees
+    };
+    
+    navigate('/checkout', { state: bookingDetails });
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-indigo-900 to-purple-900">
@@ -160,49 +177,80 @@ const SearchResultsPage = () => {
                   </div>
                 ) : boats.length > 0 ? (
                   <div className="space-y-4">
-                    {boats.map((boat) => (
-                      <div 
-                        key={boat.id} 
-                        className="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all duration-300 bg-white"
-                      >
-                        <div className="grid grid-cols-12 gap-4">
-                          {/* Left: Boat info */}
-                          <div className="col-span-8 flex">
-                            <div className="h-16 w-16 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-                              <Ship className="h-8 w-8 text-indigo-600" />
-                            </div>
-                            <div>
-                              <h3 className="font-medium text-lg">{boat.name}</h3>
-                              <div className="flex items-center text-sm text-gray-600 mt-1">
-                                <span>{boat.type}</span>
-                                <span className="mx-2">•</span>
-                                <span>Capacity: {boat.capacity} persons</span>
+                    {boats.map((boat, index) => {
+                      // Generate pseudo-random departure times
+                      const hour = 7 + (index * 3) % 12;
+                      const period = hour > 11 ? "PM" : "AM";
+                      const departureTime = `${hour === 0 ? 12 : hour}:00 ${period}`;
+                      const arrivalTime = `${(hour + 2) % 12 === 0 ? 12 : (hour + 2) % 12}:30 ${period}`;
+                      
+                      return (
+                        <div 
+                          key={boat.id} 
+                          className="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all duration-300 bg-white"
+                        >
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            {/* Left: Boat icon */}
+                            <div className="col-span-2 lg:col-span-1">
+                              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <Ship className="h-6 w-6 text-indigo-600" />
                               </div>
-                              <div className="mt-2 flex">
-                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                                  {fromParam || boat.location} → {toParam || 'Destination'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Right: Price and CTA */}
-                          <div className="col-span-4 flex flex-col items-end justify-between">
-                            <div className="text-right">
-                              <p className="text-sm text-gray-500">From</p>
-                              <p className="text-xl font-semibold">฿{boat.price_per_hour.toLocaleString()}</p>
-                              <p className="text-sm text-gray-500">per person</p>
                             </div>
                             
-                            <Link to={`/boats/${boat.id}`}>
-                              <Button className="bg-red-500 hover:bg-red-600 text-white">
+                            {/* Middle: Times and route */}
+                            <div className="col-span-6 lg:col-span-8">
+                              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="text-center">
+                                    <div className="text-lg font-semibold">{departureTime}</div>
+                                    <div className="text-xs text-gray-500">{fromParam}</div>
+                                  </div>
+                                  
+                                  <div className="flex flex-col items-center">
+                                    <div className="text-xs text-gray-500">2h 30m</div>
+                                    <div className="relative w-16 md:w-24">
+                                      <div className="border-t border-gray-300 absolute top-1/2 w-full"></div>
+                                      <ArrowRight className="h-4 w-4 text-gray-400 absolute top-1/2 right-0 transform -translate-y-1/2" />
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="text-center">
+                                    <div className="text-lg font-semibold">{arrivalTime}</div>
+                                    <div className="text-xs text-gray-500">{toParam || 'Destination'}</div>
+                                  </div>
+                                </div>
+                                
+                                <div className="mt-2 md:mt-0">
+                                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                    {boat.capacity} seats available
+                                  </span>
+                                  
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    {boat.type} • Cabin: {cabinClass}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Right: Price and CTA */}
+                            <div className="col-span-4 lg:col-span-3 flex flex-col items-end justify-between">
+                              <div className="text-right">
+                                <p className="text-sm text-gray-500">From</p>
+                                <p className="text-xl font-semibold">฿{boat.price_per_hour.toLocaleString()}</p>
+                                <p className="text-sm text-gray-500">per person</p>
+                              </div>
+                              
+                              <Button 
+                                className="bg-red-500 hover:bg-red-600 text-white"
+                                onClick={() => handleSelectBoat(boat)}
+                              >
                                 Select
                               </Button>
-                            </Link>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-16 bg-gray-50 rounded-xl">

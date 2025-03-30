@@ -43,7 +43,8 @@ const Navbar = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              className="rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 text-white border-white/10 hover:text-white hover:scale-105 hover:shadow-md backdrop-blur-sm"
+              className="rounded-full bg-white/10 hover:bg-white/30 border-none transition-all duration-300 text-white
+                        hover:text-white hover:scale-105 hover:shadow-lg backdrop-blur-sm"
             >
               <User className="h-4 w-4 mr-2" />
               Sign in
@@ -73,7 +74,8 @@ const Navbar = () => {
               <Link to="/auth" className="w-full">
                 <Button 
                   variant="outline"
-                  className="w-full rounded-full bg-white/10 hover:bg-white/20 text-white border-white/10 hover:scale-105 hover:shadow-md backdrop-blur-sm transition-all duration-300"
+                  className="w-full rounded-full bg-white/10 hover:bg-white/30 border-none text-white 
+                           hover:scale-105 hover:shadow-md backdrop-blur-sm transition-all duration-300"
                 >
                   <User className="h-4 w-4 mr-2" />
                   Sign in
