@@ -38,7 +38,7 @@ export type BookingGuest = {
   created_at: string;
 }
 
-// New type for journey details
+// Journey details type with complete information
 export type JourneyDetails = {
   date: string;
   time: string;
@@ -46,6 +46,8 @@ export type JourneyDetails = {
   to: string;
   price: number;
   duration: number;
+  departureTime?: string;
+  arrivalTime?: string;
 }
 
 export async function fetchBoats() {

@@ -25,12 +25,15 @@ interface GuestDetail {
 
 interface BookingDetails {
   boatId: string;
-  boatImage: string;
+  boatImage?: string;
   guestCount: number;
   totalPrice: number;
   tripType: string;
   departure: JourneyDetails;
   return?: JourneyDetails | null;
+  cleaningFee: number;
+  serviceFee: number;
+  journeyPrice: number;
 }
 
 const Checkout = () => {
@@ -144,18 +147,21 @@ const Checkout = () => {
         .insert({
           user_id: user.id,
           boat_id: bookingDetails.boatId,
-          boat_name: "",
+          boat_name: "Journey Ferry",
           date: bookingDetails.departure.date,
           time: bookingDetails.departure.time,
           duration: bookingDetails.departure.duration,
           guest_count: bookingDetails.guestCount,
-          total_price: bookingDetails.departure.price * bookingDetails.departure.duration + 800,
+          total_price: bookingDetails.journeyPrice + (bookingDetails.tripType === 'one-way' ? bookingDetails.cleaningFee + bookingDetails.serviceFee : 0),
           ticket_id: departureRandomTicketId
         })
         .select('id')
         .single();
 
-      if (departureBookingError) throw departureBookingError;
+      if (departureBookingError) {
+        console.error('Departure booking error:', departureBookingError);
+        throw departureBookingError;
+      }
 
       // Upload guest photos
       const photoPaths = await uploadGuestPhotos(guestDetails, departureBookingData.id);
@@ -174,7 +180,10 @@ const Checkout = () => {
         .from('booking_guests')
         .insert(departureGuestInserts);
 
-      if (departureGuestsError) throw departureGuestsError;
+      if (departureGuestsError) {
+        console.error('Departure guests error:', departureGuestsError);
+        throw departureGuestsError;
+      }
 
       setDepartureTicketId(departureRandomTicketId);
 
@@ -189,18 +198,21 @@ const Checkout = () => {
           .insert({
             user_id: user.id,
             boat_id: bookingDetails.boatId,
-            boat_name: "",
+            boat_name: "Journey Ferry",
             date: bookingDetails.return.date,
             time: bookingDetails.return.time,
             duration: bookingDetails.return.duration,
             guest_count: bookingDetails.guestCount,
-            total_price: bookingDetails.return.price * bookingDetails.return.duration + 800,
+            total_price: bookingDetails.journeyPrice + bookingDetails.cleaningFee + bookingDetails.serviceFee,
             ticket_id: returnRandomTicketId
           })
           .select('id')
           .single();
 
-        if (returnBookingError) throw returnBookingError;
+        if (returnBookingError) {
+          console.error('Return booking error:', returnBookingError);
+          throw returnBookingError;
+        }
 
         // Insert guest details with photo paths for return booking
         const returnGuestInserts = guestDetails.map((guest, index) => ({
@@ -216,7 +228,10 @@ const Checkout = () => {
           .from('booking_guests')
           .insert(returnGuestInserts);
 
-        if (returnGuestsError) throw returnGuestsError;
+        if (returnGuestsError) {
+          console.error('Return guests error:', returnGuestsError);
+          throw returnGuestsError;
+        }
 
         setReturnTicketId(returnRandomTicketId);
       }
@@ -334,9 +349,9 @@ const Checkout = () => {
                     
                     <div className="border-t border-gray-100 pt-4">
                       <div className="flex justify-between mb-2">
-                        <span className="text-gray-600">Departure journey</span>
+                        <span className="text-gray-600">Journey price</span>
                         <span className="font-medium">
-                          ฿{bookingDetails ? (bookingDetails.departure.price * bookingDetails.departure.duration).toLocaleString('en-IN') : ''}
+                          ฿{bookingDetails ? bookingDetails.journeyPrice.toLocaleString('en-IN') : '0'}
                         </span>
                       </div>
                       
@@ -344,22 +359,22 @@ const Checkout = () => {
                         <div className="flex justify-between mb-2">
                           <span className="text-gray-600">Return journey</span>
                           <span className="font-medium">
-                            ฿{(bookingDetails.return.price * bookingDetails.return.duration).toLocaleString('en-IN')}
+                            ฿{bookingDetails.journeyPrice.toLocaleString('en-IN')}
                           </span>
                         </div>
                       )}
                       
                       <div className="flex justify-between mb-2">
                         <span className="text-gray-600">Cleaning fee</span>
-                        <span className="font-medium">฿500</span>
+                        <span className="font-medium">฿{bookingDetails?.cleaningFee.toLocaleString('en-IN') || '500'}</span>
                       </div>
                       <div className="flex justify-between mb-2">
                         <span className="text-gray-600">Service fee</span>
-                        <span className="font-medium">฿300</span>
+                        <span className="font-medium">฿{bookingDetails?.serviceFee.toLocaleString('en-IN') || '300'}</span>
                       </div>
                       <div className="flex justify-between font-bold text-lg border-t border-gray-100 pt-3 mt-3">
                         <span>Total</span>
-                        <span>฿{bookingDetails?.totalPrice.toLocaleString('en-IN')}</span>
+                        <span>฿{bookingDetails?.totalPrice.toLocaleString('en-IN') || '0'}</span>
                       </div>
                     </div>
                   </div>
@@ -417,7 +432,7 @@ const Checkout = () => {
                 </div>
                 
                 {/* Return Journey Ticket - Only show if it's a round trip */}
-                {bookingDetails?.tripType === 'round-trip' && bookingDetails.return && (
+                {bookingDetails?.tripType === 'round-trip' && bookingDetails.return && returnTicketId && (
                   <div className="bg-gray-50 rounded-lg p-4 mb-6">
                     <h3 className="text-lg font-medium text-gray-900 mb-2">Return Journey</h3>
                     <p className="text-gray-700 mb-1"><strong>From:</strong> {bookingDetails.return.from}</p>
