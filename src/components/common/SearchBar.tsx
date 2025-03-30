@@ -1,10 +1,11 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar as CalendarIcon, MapPin, Users, Search } from 'lucide-react';
+import { Calendar as CalendarIcon, MapPin, Users, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar"; // Keep this import
-import { format } from "date-fns";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { format, addMonths, isValid } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
@@ -16,7 +17,6 @@ import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { cn } from '@/lib/utils';
-import { DayPicker } from 'react-day-picker'; // IMPORT THIS
 
 interface SearchBarProps {
   compact?: boolean;
@@ -31,6 +31,7 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
   const [tripType, setTripType] = useState('round-trip');
   const [departureDate, setDepartureDate] = useState<Date | undefined>(undefined);
   const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [cabinClass, setCabinClass] = useState('economy');
   
   // Multiple passenger types with counts
@@ -41,6 +42,13 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
     senior: 0,
     student: 0
   });
+
+  // Mock data for calendar price indicators
+  const priceTiers = {
+    low: [1, 5, 6, 12, 13, 18, 25],  // Low price days (green)
+    medium: [2, 7, 8, 14, 19, 20, 26, 27],   // Medium price days (amber)
+    high: [3, 4, 9, 10, 11, 15, 16, 21, 22] // High price days (red)
+  };
 
   const handleSearch = () => {
     // Create a more structured passenger object
@@ -67,8 +75,8 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
     const params = new URLSearchParams();
     if (searchLocation) params.append('from', searchLocation);
     if (searchDestination) params.append('to', searchDestination);
-    if (departureDate) params.append('departure', format(departureDate, 'yyyy-MM-dd'));
-    if (returnDate && tripType === 'round-trip') params.append('return', format(returnDate, 'yyyy-MM-dd'));
+    if (departureDate && isValid(departureDate)) params.append('departure', format(departureDate, 'yyyy-MM-dd'));
+    if (returnDate && tripType === 'round-trip' && isValid(returnDate)) params.append('return', format(returnDate, 'yyyy-MM-dd'));
     params.append('tripType', tripType);
     params.append('cabinClass', cabinClass);
     params.append('passengers', JSON.stringify(passengersData));
@@ -88,6 +96,139 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
         [type]: newCount
       };
     });
+  };
+
+  // Handle month navigation
+  const goToPreviousMonth = () => {
+    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+
+  const goToNextMonth = () => {
+    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+
+  // Custom component for the calendar header with month navigation
+  const CalendarHeader = ({ currentMonth }: { currentMonth: Date }) => {
+    const nextMonth = addMonths(currentMonth, 1);
+    
+    return (
+      <div className="flex justify-between items-center mb-4 px-2">
+        <button onClick={goToPreviousMonth} className="p-1 rounded-full hover:bg-gray-100">
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        
+        <div className="grid grid-cols-2 flex-grow text-center">
+          <div className="text-sm font-medium">
+            {format(currentMonth, 'MMMM yyyy')}
+          </div>
+          <div className="text-sm font-medium">
+            {format(nextMonth, 'MMMM yyyy')}
+          </div>
+        </div>
+        
+        <button onClick={goToNextMonth} className="p-1 rounded-full hover:bg-gray-100">
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+    );
+  };
+
+  // Get price tier for a day
+  const getDayPriceTier = (date: Date) => {
+    const day = date.getDate();
+    if (priceTiers.low.includes(day)) return 'low';
+    if (priceTiers.medium.includes(day)) return 'medium';
+    if (priceTiers.high.includes(day)) return 'high';
+    return 'normal';
+  };
+
+  // Custom dual-month calendar component
+  const DualMonthCalendar = ({ selectedDate, onDateSelect, calendarType }: { 
+    selectedDate: Date | undefined, 
+    onDateSelect: (date: Date | undefined) => void,
+    calendarType: 'departure' | 'return'
+  }) => {
+    const nextMonth = addMonths(currentMonth, 1);
+    
+    const handleDayClick = (day: Date) => {
+      // If selecting return date and it's before departure date, don't allow
+      if (calendarType === 'return' && departureDate && day < departureDate) {
+        return;
+      }
+      
+      // If selecting departure date and it's after return date, clear return date
+      if (calendarType === 'departure' && returnDate && day > returnDate) {
+        setReturnDate(undefined);
+      }
+      
+      onDateSelect(day);
+    };
+
+    return (
+      <div className="p-2 bg-white">
+        <CalendarHeader currentMonth={currentMonth} />
+        
+        {/* Price indicator legend inside the calendar */}
+        <div className="flex justify-between mb-2 px-2">
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 bg-green-100"></div>
+            <span className="text-xs">฿1,000</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 bg-amber-100"></div>
+            <span className="text-xs">฿1,500</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 bg-red-100"></div>
+            <span className="text-xs">฿2,000</span>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4">
+          {/* First Month */}
+          <div>
+            <div className="grid grid-cols-7 text-center mb-1">
+              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+                <div key={i} className="text-xs font-medium text-gray-500">{day}</div>
+              ))}
+            </div>
+            
+            <CalendarComponent
+              mode="single"
+              selected={selectedDate}
+              onSelect={handleDayClick}
+              month={currentMonth}
+              showOutsideDays={false}
+              className="pointer-events-auto"
+              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+            />
+          </div>
+          
+          {/* Second Month */}
+          <div>
+            <div className="grid grid-cols-7 text-center mb-1">
+              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+                <div key={i} className="text-xs font-medium text-gray-500">{day}</div>
+              ))}
+            </div>
+            
+            <CalendarComponent
+              mode="single"
+              selected={selectedDate}
+              onSelect={handleDayClick}
+              month={nextMonth}
+              showOutsideDays={false}
+              className="pointer-events-auto"
+              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+            />
+          </div>
+        </div>
+        
+        <div className="mt-4 text-center text-xs text-gray-500">
+          {calendarType === 'departure' ? 'Select your departure date' : 'Select your return date'}
+        </div>
+      </div>
+    );
   };
 
   // Calculate total passengers
@@ -142,15 +283,15 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
                   >
                     <CalendarIcon className="h-3 w-3 text-gray-400 mr-1" />
                     <span className="truncate">
-                      {departureDate ? format(departureDate, 'dd MMM') : 'Departure'}
+                      {departureDate && isValid(departureDate) ? format(departureDate, 'dd MMM') : 'Departure'}
                     </span>
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[600px] p-0" align="start">
-                  <DayPicker // REPLACED DualMonthCalendar HERE
-                    mode="single"
-                    selected={departureDate}
-                    onSelect={setDepartureDate}
+                  <DualMonthCalendar 
+                    selectedDate={departureDate} 
+                    onDateSelect={setDepartureDate}
+                    calendarType="departure"
                   />
                 </PopoverContent>
               </Popover>
@@ -167,15 +308,15 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
                     >
                       <CalendarIcon className="h-3 w-3 text-gray-400 mr-1" />
                       <span className="truncate">
-                        {returnDate ? format(returnDate, 'dd MMM') : 'Return'}
+                        {returnDate && isValid(returnDate) ? format(returnDate, 'dd MMM') : 'Return'}
                       </span>
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-[600px] p-0" align="start">
-                    <DayPicker // REPLACED DualMonthCalendar HERE
-                      mode="single"
-                      selected={returnDate}
-                      onSelect={setReturnDate}
+                    <DualMonthCalendar 
+                      selectedDate={returnDate} 
+                      onDateSelect={setReturnDate}
+                      calendarType="return"
                     />
                   </PopoverContent>
                 </Popover>

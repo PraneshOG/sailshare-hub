@@ -18,24 +18,18 @@ const SearchBar = () => {
 
   // Function to get price levels for dates
   const getPriceTiers = (date: Date) => {
-    // Low price days (green)
-      if (date.getDate() % 3 === 0) {
-        return "low";
-      } 
-      // Medium price days (amber)
-      else if (date.getDate() % 3 === 1) {
-        return "medium";
-      } 
-      // High price days (purple)
-      else{
-        return "high";
-      }
+    if (date.getDate() % 3 === 0) {
+      return "low";
+    } else if (date.getDate() % 3 === 1) {
+      return "medium";
+    } else {
+      return "high";
+    }
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Build query parameters
     const params = new URLSearchParams();
     if (location) params.append('location', location);
     if (date) params.append('date', format(date, 'yyyy-MM-dd'));
@@ -50,7 +44,6 @@ const SearchBar = () => {
     high: "#8A3FFC",
   };
 
-  // Get unique price tiers used in the current month
   const getUniquePriceTiers = (month: Date) => {
     const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
     const uniqueTiers = new Set<string>();
@@ -62,10 +55,8 @@ const SearchBar = () => {
     return Array.from(uniqueTiers);
   };
 
-  // State to store unique price tiers
   const [uniquePriceTiers, setUniquePriceTiers] = useState<string[]>([]);
 
-  // Handler for month change in the calendar
   const handleMonthChange = (month: Date) => {
     setUniquePriceTiers(getUniquePriceTiers(month));
   };
@@ -106,30 +97,22 @@ const SearchBar = () => {
                     onSelect={setDate}
                     initialFocus
                     className="p-3 pointer-events-auto"
-                    onMonthChange={handleMonthChange} // Call handleMonthChange when the month changes
-                    modifiers={{
-                      low: (date) => getPriceTiers(date) === "low",
-                      medium: (date) => getPriceTiers(date) === "medium",
-                      high: (date) => getPriceTiers(date) === "high"
-                    }}
-                    modifiersClassNames={{
-                      low: "bg-[#F8CB45] text-black font-medium rounded-md",
-                      medium: "bg-[#F8CB45] text-black font-medium rounded-md",
-                      high: "bg-[#8A3FFC] text-white font-medium rounded-md"
-                    }}
+                    onMonthChange={handleMonthChange}
                     classNames={{
+                      day: (date) => {
+                        const tier = getPriceTiers(date);
+                        let colorClass = '';
+                        if (tier === 'low') colorClass = 'bg-[#F8CB45] text-black font-medium rounded-md';
+                        if (tier === 'medium') colorClass = 'bg-[#F8CB45] text-black font-medium rounded-md';
+                        if (tier === 'high') colorClass = 'bg-[#8A3FFC] text-white font-medium rounded-md';
+
+                        return cn(
+                          "h-10 w-10 p-0 font-normal flex items-center justify-center rounded-md aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground",
+                          colorClass
+                        );
+                      },
                       day_selected: "bg-ocean-600 text-white hover:bg-ocean-500 hover:text-white focus:bg-ocean-600 focus:text-white",
                       day_today: "font-bold border-2 border-ocean-600",
-                      day: "rounded-md hover:bg-ocean-100 hover:text-ocean-800 text-sm aria-selected:opacity-100 w-10 h-10 p-0 flex items-center justify-center",
-                      head_cell: "text-gray-600 font-medium text-center w-10",
-                      caption: "text-lg font-medium py-2",
-                      nav_button: "border border-gray-200 bg-white hover:bg-gray-50",
-                      table: "border-collapse space-y-1",
-                      cell: "p-0 relative [&:has([aria-selected])]:bg-ocean-50 focus-within:relative focus-within:z-20 w-10 h-10",
-                      row: "flex w-full mt-0",
-                      head_row: "flex",
-                      months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                      month: "space-y-2",
                     }}
                   />
                   {/* Price Legend */}
