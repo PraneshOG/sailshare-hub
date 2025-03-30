@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Calendar, Users, MapPin } from 'lucide-react';
@@ -98,30 +99,45 @@ const SearchBar = () => {
                     initialFocus
                     className="p-3 pointer-events-auto"
                     onMonthChange={handleMonthChange}
+                    styles={{
+                      day_low: { backgroundColor: "#F8CB45", color: "black", fontWeight: "500", borderRadius: "0.375rem" },
+                      day_medium: { backgroundColor: "#F8CB45", color: "black", fontWeight: "500", borderRadius: "0.375rem" },
+                      day_high: { backgroundColor: "#8A3FFC", color: "white", fontWeight: "500", borderRadius: "0.375rem" }
+                    }}
+                    modifiers={{
+                      low: (date) => getPriceTiers(date) === 'low',
+                      medium: (date) => getPriceTiers(date) === 'medium',
+                      high: (date) => getPriceTiers(date) === 'high',
+                    }}
+                    modifiersStyles={{
+                      low: { backgroundColor: "#F8CB45", color: "black", fontWeight: "500", borderRadius: "0.375rem" },
+                      medium: { backgroundColor: "#F8CB45", color: "black", fontWeight: "500", borderRadius: "0.375rem" },
+                      high: { backgroundColor: "#8A3FFC", color: "white", fontWeight: "500", borderRadius: "0.375rem" }
+                    }}
                     classNames={{
                       day: (date) => {
                         const tier = getPriceTiers(date);
-                        let colorClass = '';
-                        if (tier === 'low') colorClass = 'bg-[#F8CB45] text-black font-medium rounded-md';
-                        if (tier === 'medium') colorClass = 'bg-[#F8CB45] text-black font-medium rounded-md';
-                        if (tier === 'high') colorClass = 'bg-[#8A3FFC] text-white font-medium rounded-md';
-
-                        return cn(
-                          "h-10 w-10 p-0 font-normal flex items-center justify-center rounded-md aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground",
-                          colorClass
-                        );
-                      },
-                      day_selected: "bg-ocean-600 text-white hover:bg-ocean-500 hover:text-white focus:bg-ocean-600 focus:text-white",
-                      day_today: "font-bold border-2 border-ocean-600",
+                        if (tier === 'low') return "bg-[#F8CB45] text-black font-medium rounded-md";
+                        if (tier === 'medium') return "bg-[#F8CB45] text-black font-medium rounded-md";
+                        if (tier === 'high') return "bg-[#8A3FFC] text-white font-medium rounded-md";
+                        return "";
+                      }
                     }}
                   />
                   {/* Price Legend */}
-                  <div className="p-3 border-t border-gray-200 flex items-center justify-between">
-                    {Object.entries(tierColors).map(([tier, color]) => (
-                      <div key={tier} className={`flex items-center px-2 py-1 bg-[${color}]/20 rounded`}>
-                        <span className="text-xs">₹{Math.floor(Math.random() * (30000 - 10000 + 1)) + 10000}+</span>
-                      </div>
-                    ))}
+                  <div className="p-3 border-t border-gray-200 flex items-center justify-around">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-[#F8CB45] rounded"></div>
+                      <span className="text-xs">₹14,000+</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-[#F8CB45] rounded"></div>
+                      <span className="text-xs">₹18,000+</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-[#8A3FFC] rounded"></div>
+                      <span className="text-xs">₹24,000+</span>
+                    </div>
                   </div>
                 </div>
               </PopoverContent>

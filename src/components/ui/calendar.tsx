@@ -36,10 +36,10 @@ function Calendar({
         row: "flex w-full mt-0",
         cell: "text-center p-0 relative w-10 h-10 focus-within:relative focus-within:z-20",
         day: cn(
-          "h-10 w-10 p-0 font-normal flex items-center justify-center rounded-none aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground"
+          "h-10 w-10 p-0 font-normal flex items-center justify-center rounded-md aria-selected:opacity-100"
         ),
         day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "font-bold border-2 border-primary",
+        day_today: "border-2 border-primary",
         day_outside: "text-muted-foreground opacity-50",
         day_disabled: "text-muted-foreground opacity-50",
         day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",

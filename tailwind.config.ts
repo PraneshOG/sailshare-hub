@@ -10,6 +10,14 @@ export default {
 		"./src/**/*.{ts,tsx}",
 	],
 	prefix: "",
+	safelist: [
+		"bg-[#F8CB45]",
+		"bg-[#8A3FFC]",
+		"text-black",
+		"text-white",
+		"font-medium",
+		"rounded-md"
+	],
 	theme: {
 		container: {
 			center: true,
@@ -92,6 +100,11 @@ export default {
 					900: '#61483c',
 					950: '#352821',
 				},
+				calendar: {
+					low: '#F8CB45',
+					medium: '#F8CB45',
+					high: '#8A3FFC',
+				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
