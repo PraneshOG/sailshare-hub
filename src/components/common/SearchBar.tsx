@@ -31,7 +31,6 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
   const [tripType, setTripType] = useState('round-trip');
   const [departureDate, setDepartureDate] = useState<Date | undefined>(undefined);
   const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
-  const [passengerCount, setPassengerCount] = useState(1);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [cabinClass, setCabinClass] = useState('economy');
   
@@ -82,7 +81,7 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
     params.append('cabinClass', cabinClass);
     params.append('passengers', JSON.stringify(passengersData));
     
-    navigate(`/boats?${params.toString()}`);
+    navigate(`/search-results?${params.toString()}`);
   };
 
   // Handle passenger count changes
@@ -97,13 +96,6 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
         [type]: newCount
       };
     });
-  };
-
-  // Price indicators for the color-coding legend
-  const priceIndicators = {
-    low: '฿1,000',
-    medium: '฿1,500',
-    high: '฿2,000',
   };
 
   // Handle month navigation
@@ -141,6 +133,15 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
     );
   };
 
+  // Get price tier for a day
+  const getDayPriceTier = (date: Date) => {
+    const day = date.getDate();
+    if (priceTiers.low.includes(day)) return 'low';
+    if (priceTiers.medium.includes(day)) return 'medium';
+    if (priceTiers.high.includes(day)) return 'high';
+    return 'normal';
+  };
+
   // Custom day renderer for dual calendar
   const renderDay = (day: Date, isSecondMonth = false) => {
     const tier = getDayPriceTier(day);
@@ -160,22 +161,8 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
         className={`relative w-full h-full flex flex-col items-center justify-center rounded-md ${bgColor} hover:bg-opacity-80 cursor-pointer text-sm py-1`}
       >
         <span>{day.getDate()}</span>
-        <span className="text-[9px]">
-          {tier === 'low' ? priceIndicators.low : 
-           tier === 'medium' ? priceIndicators.medium : 
-           tier === 'high' ? priceIndicators.high : ''}
-        </span>
       </div>
     );
-  };
-
-  // Function to determine day price tier
-  const getDayPriceTier = (date: Date) => {
-    const day = date.getDate();
-    if (priceTiers.low.includes(day)) return 'low';
-    if (priceTiers.medium.includes(day)) return 'medium';
-    if (priceTiers.high.includes(day)) return 'high';
-    return 'normal';
   };
 
   // Custom dual-month calendar component
@@ -204,19 +191,19 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
       <div className="p-2 bg-white">
         <CalendarHeader currentMonth={currentMonth} />
         
-        {/* Price indicator legend moved inside the calendar */}
+        {/* Price indicator legend inside the calendar */}
         <div className="flex justify-between mb-2 px-2">
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 bg-green-100"></div>
-            <span className="text-xs">Low</span>
+            <span className="text-xs">฿1,000</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 bg-amber-100"></div>
-            <span className="text-xs">Medium</span>
+            <span className="text-xs">฿1,500</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 bg-red-100"></div>
-            <span className="text-xs">High</span>
+            <span className="text-xs">฿2,000</span>
           </div>
         </div>
         
@@ -382,7 +369,7 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-72 p-3 bg-white">
+                <DropdownMenuContent className="w-72 p-3 bg-white mt-1" side="bottom" align="start">
                   <div className="space-y-3">
                     <div className="text-sm font-medium mb-2">Passengers</div>
                     

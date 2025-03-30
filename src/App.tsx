@@ -11,6 +11,7 @@ import Checkout from "./pages/Checkout";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
+import SearchResults from "./pages/SearchResults";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/boats" element={<Boats />} />
+          <Route path="/search-results" element={<SearchResults />} />
           <Route path="/boats/:id" element={<BoatDetail />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/auth" element={<Auth />} />
