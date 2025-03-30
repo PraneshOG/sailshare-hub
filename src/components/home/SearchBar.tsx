@@ -15,18 +15,21 @@ const SearchBar = () => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [guests, setGuests] = useState('');
 
-  // Function to get random price level class for a date
-  const getPriceLevelClass = (date: Date) => {
-    // Use the date to deterministically generate a price level (based on day of month)
-    const day = date.getDate();
-    
-    if (day % 3 === 0) {
-      return "bg-[#F2FCE2] hover:bg-[#E5F6C5] text-emerald-800"; // Low price
-    } else if (day % 3 === 1) {
-      return "bg-[#FEF7CD] hover:bg-[#F9EDB5] text-amber-800"; // Medium price
-    } else {
-      return "bg-[#FEC6A1] hover:bg-[#F9B58A] text-orange-800"; // High price
+  // Function to get price levels for dates
+  const getPriceTiers = (day: number) => {
+    // Low price days (green)
+    if ([2, 3, 4, 5, 30, 31].includes(day)) {
+      return "low";
+    } 
+    // Medium price days (amber)
+    else if ([6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 23, 24, 25, 26, 27, 28].includes(day)) {
+      return "medium";
+    } 
+    // High price days (purple)
+    else if ([1, 22, 29].includes(day)) {
+      return "high";
     }
+    return "";
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -78,46 +81,40 @@ const SearchBar = () => {
                     initialFocus
                     className="p-3 pointer-events-auto"
                     modifiers={{
-                      low: (date) => date.getDate() % 3 === 0,
-                      medium: (date) => date.getDate() % 3 === 1,
-                      high: (date) => date.getDate() % 3 === 2
+                      low: (date) => ["low"].includes(getPriceTiers(date.getDate())),
+                      medium: (date) => ["medium"].includes(getPriceTiers(date.getDate())),
+                      high: (date) => ["high"].includes(getPriceTiers(date.getDate()))
                     }}
                     modifiersClassNames={{
-                      low: "bg-green-100 border border-green-300 font-medium",
-                      medium: "bg-amber-100 border border-amber-300 font-medium",
-                      high: "bg-red-100 border border-red-300 font-medium"
+                      low: "bg-[#12B981]/20 border-0 text-black font-medium",
+                      medium: "bg-[#F8CB45]/20 border-0 text-black font-medium",
+                      high: "bg-[#8A3FFC] border-0 text-white font-medium"
                     }}
                     classNames={{
                       day_selected: "bg-ocean-600 text-white hover:bg-ocean-500 hover:text-white focus:bg-ocean-600 focus:text-white",
-                      day_today: "text-ocean-800 font-bold ring-2 ring-ocean-500",
-                      day: "hover:bg-ocean-100 hover:text-ocean-800 text-sm aria-selected:opacity-100",
-                      head_cell: "text-ocean-600 font-semibold",
-                      caption: "text-ocean-800 font-medium",
-                      nav_button: "border border-ocean-200 bg-white hover:bg-ocean-50",
+                      day_today: "font-bold border-2 border-ocean-600",
+                      day: "hover:bg-ocean-100 hover:text-ocean-800 text-sm aria-selected:opacity-100 w-10 h-10 p-0 flex items-center justify-center rounded-none",
+                      head_cell: "text-gray-600 font-medium text-center w-10",
+                      caption: "text-lg font-medium py-2",
+                      nav_button: "border border-gray-200 bg-white hover:bg-gray-50",
                       table: "border-collapse space-y-1",
-                      cell: "p-0 relative [&:has([aria-selected])]:bg-ocean-50 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                      row: "flex w-full mt-2",
+                      cell: "p-0 relative [&:has([aria-selected])]:bg-ocean-50 focus-within:relative focus-within:z-20 w-10 h-10",
+                      row: "flex w-full mt-0",
                       head_row: "flex",
                       months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                      month: "space-y-4",
+                      month: "space-y-2",
                     }}
                   />
                   {/* Price Legend */}
-                  <div className="p-3 border-t border-gray-200">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Price Legend:</p>
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 rounded-full bg-green-100 border border-green-300 mr-1.5"></div>
-                        <span className="text-xs text-gray-600">Low</span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 rounded-full bg-amber-100 border border-amber-300 mr-1.5"></div>
-                        <span className="text-xs text-gray-600">Medium</span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 rounded-full bg-red-100 border border-red-300 mr-1.5"></div>
-                        <span className="text-xs text-gray-600">High</span>
-                      </div>
+                  <div className="p-3 border-t border-gray-200 flex items-center justify-between">
+                    <div className="flex items-center px-2 py-1 bg-[#12B981]/20 rounded">
+                      <span className="text-xs">₹12481+</span>
+                    </div>
+                    <div className="flex items-center px-2 py-1 bg-[#F8CB45]/20 rounded">
+                      <span className="text-xs">₹16133+</span>
+                    </div>
+                    <div className="flex items-center px-2 py-1 bg-[#FF6B6B]/20 rounded">
+                      <span className="text-xs">₹23954+</span>
                     </div>
                   </div>
                 </div>
