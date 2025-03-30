@@ -1,16 +1,18 @@
 
 import { format, addDays, isAfter, isBefore, isValid, parse } from 'date-fns';
 
-export const formatDate = (date: Date | undefined, formatString: string = 'MMM dd, yyyy'): string => {
+export const formatDate = (date: Date | undefined | null, formatString: string = 'MMM dd, yyyy'): string => {
   if (!date || !isValid(date)) return '';
   return format(date, formatString);
 };
 
-export const parseDate = (dateString: string, formatString: string = 'yyyy-MM-dd'): Date | null => {
+export const parseDate = (dateString: string | undefined | null, formatString: string = 'yyyy-MM-dd'): Date | null => {
   try {
+    if (!dateString) return null;
     const date = parse(dateString, formatString, new Date());
     return isValid(date) ? date : null;
   } catch (error) {
+    console.error('Error parsing date:', error);
     return null;
   }
 };

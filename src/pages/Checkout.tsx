@@ -5,14 +5,14 @@ import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calendar, Clock, Users, QrCode, User } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Users, User } from 'lucide-react';
 import QRCodeGenerator from '@/components/checkout/QRCodeGenerator';
 import GuestDetailsForm from '@/components/checkout/GuestDetailsForm';
 import { useToast } from '@/components/ui/use-toast';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import Auth from './Auth';
 import { JourneyDetails } from '@/integrations/supabase/services';
-import { format } from 'date-fns';
+import { formatDate as formatDateUtil } from '@/lib/date-utils';
 
 interface GuestDetail {
   name: string;
@@ -40,13 +40,14 @@ const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
   const [guestDetails, setGuestDetails] = useState<GuestDetail[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
   const [departureTicketId, setDepartureTicketId] = useState('');
   const [returnTicketId, setReturnTicketId] = useState('');
   const [guestPhotos, setGuestPhotos] = useState<string[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -75,6 +76,20 @@ const Checkout = () => {
 
   const handleGuestDetailsChange = (details: GuestDetail[]) => {
     setGuestDetails(details);
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return dateString; // Return original if invalid
+      }
+      const options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      return date.toLocaleDateString('en-US', options);
+    } catch (error) {
+      console.error("Date formatting error:", error);
+      return dateString;
+    }
   };
 
   const uploadGuestPhotos = async (guestDetails: GuestDetail[], bookingId: string) => {
@@ -118,7 +133,14 @@ const Checkout = () => {
       return;
     }
 
-    if (!bookingDetails) return;
+    if (!bookingDetails) {
+      toast({
+        title: "Missing Booking Details",
+        description: "Unable to process your booking. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     const allGuestsValid = guestDetails.length === bookingDetails.guestCount &&
       guestDetails.every(guest => 
@@ -138,6 +160,8 @@ const Checkout = () => {
     }
     
     try {
+      setIsProcessing(true);
+      
       // Create departure ticket ID
       const departureRandomTicketId = 'SB-' + Math.floor(100000 + Math.random() * 900000);
       
@@ -146,13 +170,15 @@ const Checkout = () => {
         .from('bookings')
         .insert({
           user_id: user.id,
-          boat_id: bookingDetails.boatId,
+          boat_id: bookingDetails.boatId || '00000000-0000-0000-0000-000000000000',
           boat_name: "Journey Ferry",
           date: bookingDetails.departure.date,
           time: bookingDetails.departure.time,
           duration: bookingDetails.departure.duration,
           guest_count: bookingDetails.guestCount,
-          total_price: bookingDetails.journeyPrice + (bookingDetails.tripType === 'one-way' ? bookingDetails.cleaningFee + bookingDetails.serviceFee : 0),
+          total_price: bookingDetails.tripType === 'one-way' ? 
+            bookingDetails.totalPrice : 
+            (bookingDetails.journeyPrice + bookingDetails.cleaningFee + bookingDetails.serviceFee),
           ticket_id: departureRandomTicketId
         })
         .select('id')
@@ -197,7 +223,7 @@ const Checkout = () => {
           .from('bookings')
           .insert({
             user_id: user.id,
-            boat_id: bookingDetails.boatId,
+            boat_id: bookingDetails.boatId || '00000000-0000-0000-0000-000000000000',
             boat_name: "Journey Ferry",
             date: bookingDetails.return.date,
             time: bookingDetails.return.time,
@@ -237,8 +263,10 @@ const Checkout = () => {
       }
 
       setIsCompleted(true);
+      setIsProcessing(false);
       window.scrollTo(0, 0);
     } catch (error) {
+      setIsProcessing(false);
       console.error('Booking submission error:', error);
       toast({
         title: "Booking Failed",
@@ -246,11 +274,6 @@ const Checkout = () => {
         variant: "destructive"
       });
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-IN', options);
   };
 
   if (!user) {
@@ -294,9 +317,9 @@ const Checkout = () => {
                       <Button 
                         type="submit"
                         className="w-full bg-ocean-600 hover:bg-ocean-700 text-white font-medium py-3 rounded-lg transition-all"
-                        disabled={guestDetails.length !== bookingDetails?.guestCount}
+                        disabled={guestDetails.length !== bookingDetails?.guestCount || isProcessing}
                       >
-                        Complete Booking
+                        {isProcessing ? "Processing..." : "Complete Booking"}
                       </Button>
                     </form>
                   </div>
@@ -351,7 +374,7 @@ const Checkout = () => {
                       <div className="flex justify-between mb-2">
                         <span className="text-gray-600">Journey price</span>
                         <span className="font-medium">
-                          ฿{bookingDetails ? bookingDetails.journeyPrice.toLocaleString('en-IN') : '0'}
+                          ฿{bookingDetails ? bookingDetails.journeyPrice.toLocaleString() : '0'}
                         </span>
                       </div>
                       
@@ -359,22 +382,22 @@ const Checkout = () => {
                         <div className="flex justify-between mb-2">
                           <span className="text-gray-600">Return journey</span>
                           <span className="font-medium">
-                            ฿{bookingDetails.journeyPrice.toLocaleString('en-IN')}
+                            ฿{bookingDetails.journeyPrice.toLocaleString()}
                           </span>
                         </div>
                       )}
                       
                       <div className="flex justify-between mb-2">
                         <span className="text-gray-600">Cleaning fee</span>
-                        <span className="font-medium">฿{bookingDetails?.cleaningFee.toLocaleString('en-IN') || '500'}</span>
+                        <span className="font-medium">฿{bookingDetails?.cleaningFee.toLocaleString() || '500'}</span>
                       </div>
                       <div className="flex justify-between mb-2">
                         <span className="text-gray-600">Service fee</span>
-                        <span className="font-medium">฿{bookingDetails?.serviceFee.toLocaleString('en-IN') || '300'}</span>
+                        <span className="font-medium">฿{bookingDetails?.serviceFee.toLocaleString() || '300'}</span>
                       </div>
                       <div className="flex justify-between font-bold text-lg border-t border-gray-100 pt-3 mt-3">
                         <span>Total</span>
-                        <span>฿{bookingDetails?.totalPrice.toLocaleString('en-IN') || '0'}</span>
+                        <span>฿{bookingDetails?.totalPrice.toLocaleString() || '0'}</span>
                       </div>
                     </div>
                   </div>

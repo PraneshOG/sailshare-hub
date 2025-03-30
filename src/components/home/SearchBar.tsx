@@ -3,11 +3,15 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Calendar, Users, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { format } from 'date-fns';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
 
 const SearchBar = () => {
   const navigate = useNavigate();
   const [location, setLocation] = useState('');
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState<Date | undefined>(undefined);
   const [guests, setGuests] = useState('');
 
   const handleSearch = (e: React.FormEvent) => {
@@ -16,7 +20,7 @@ const SearchBar = () => {
     // Build query parameters
     const params = new URLSearchParams();
     if (location) params.append('location', location);
-    if (date) params.append('date', date);
+    if (date) params.append('date', format(date, 'yyyy-MM-dd'));
     if (guests) params.append('guests', guests);
     
     navigate(`/boats?${params.toString()}`);
@@ -40,18 +44,26 @@ const SearchBar = () => {
           </div>
           
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Calendar className="h-5 w-5 text-gray-400" />
-            </div>
-            <input 
-              type="text" 
-              className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-ocean-500/50 focus:border-transparent transition-all"
-              placeholder="Start Date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              // In a real app, you'd use a date picker
-              onClick={() => console.log('Open date picker')}
-            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className={cn(
+                  "w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-ocean-500/50 focus:border-transparent transition-all justify-start",
+                  !date && "text-muted-foreground"
+                )}>
+                  <Calendar className="h-5 w-5 text-gray-400 absolute left-3" />
+                  {date ? format(date, 'PP') : <span>Select date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
           </div>
           
           <div className="relative">

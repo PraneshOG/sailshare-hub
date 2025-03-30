@@ -5,7 +5,7 @@ import { Calendar as CalendarIcon, MapPin, Users, Search, ChevronLeft, ChevronRi
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { format, addMonths } from "date-fns";
+import { format, addMonths, isValid } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
@@ -75,8 +75,8 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
     const params = new URLSearchParams();
     if (searchLocation) params.append('from', searchLocation);
     if (searchDestination) params.append('to', searchDestination);
-    if (departureDate) params.append('departure', format(departureDate, 'yyyy-MM-dd'));
-    if (returnDate && tripType === 'round-trip') params.append('return', format(returnDate, 'yyyy-MM-dd'));
+    if (departureDate && isValid(departureDate)) params.append('departure', format(departureDate, 'yyyy-MM-dd'));
+    if (returnDate && tripType === 'round-trip' && isValid(returnDate)) params.append('return', format(returnDate, 'yyyy-MM-dd'));
     params.append('tripType', tripType);
     params.append('cabinClass', cabinClass);
     params.append('passengers', JSON.stringify(passengersData));
@@ -142,29 +142,6 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
     return 'normal';
   };
 
-  // Custom day renderer for dual calendar
-  const renderDay = (day: Date, isSecondMonth = false) => {
-    const tier = getDayPriceTier(day);
-    const isSelected = 
-      (departureDate && day.getTime() === departureDate.getTime()) ||
-      (returnDate && day.getTime() === returnDate.getTime());
-    
-    const bgColor = 
-      isSelected ? 'bg-purple-600 text-white' : 
-      tier === 'low' ? 'bg-green-100' : 
-      tier === 'medium' ? 'bg-amber-100' : 
-      tier === 'high' ? 'bg-red-100' : 
-      'bg-transparent';
-    
-    return (
-      <div 
-        className={`relative w-full h-full flex flex-col items-center justify-center rounded-md ${bgColor} hover:bg-opacity-80 cursor-pointer text-sm py-1`}
-      >
-        <span>{day.getDate()}</span>
-      </div>
-    );
-  };
-
   // Custom dual-month calendar component
   const DualMonthCalendar = ({ selectedDate, onDateSelect, calendarType }: { 
     selectedDate: Date | undefined, 
@@ -221,11 +198,9 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
               selected={selectedDate}
               onSelect={handleDayClick}
               month={currentMonth}
-              components={{
-                Day: ({ date }) => renderDay(date),
-              }}
               showOutsideDays={false}
               className="pointer-events-auto"
+              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
             />
           </div>
           
@@ -242,11 +217,9 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
               selected={selectedDate}
               onSelect={handleDayClick}
               month={nextMonth}
-              components={{
-                Day: ({ date }) => renderDay(date, true),
-              }}
               showOutsideDays={false}
               className="pointer-events-auto"
+              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
             />
           </div>
         </div>
@@ -310,7 +283,7 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
                   >
                     <CalendarIcon className="h-3 w-3 text-gray-400 mr-1" />
                     <span className="truncate">
-                      {departureDate ? format(departureDate, 'dd MMM') : 'Departure'}
+                      {departureDate && isValid(departureDate) ? format(departureDate, 'dd MMM') : 'Departure'}
                     </span>
                   </Button>
                 </PopoverTrigger>
@@ -335,7 +308,7 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
                     >
                       <CalendarIcon className="h-3 w-3 text-gray-400 mr-1" />
                       <span className="truncate">
-                        {returnDate ? format(returnDate, 'dd MMM') : 'Return'}
+                        {returnDate && isValid(returnDate) ? format(returnDate, 'dd MMM') : 'Return'}
                       </span>
                     </Button>
                   </PopoverTrigger>
