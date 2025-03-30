@@ -41,9 +41,9 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-4">
           <Link to="/auth">
             <Button 
-              variant="default" 
+              variant="secondary" 
               size="sm" 
-              className="rounded-full bg-red-500 hover:bg-red-600"
+              className="rounded-full bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-300 text-white"
             >
               <User className="h-4 w-4 mr-2" />
               Sign in
@@ -72,8 +72,8 @@ const Navbar = () => {
             <div className="flex items-center justify-between pt-2 gap-4">
               <Link to="/auth" className="w-full">
                 <Button 
-                  variant="default" 
-                  className="w-full rounded-full bg-red-500 hover:bg-red-600"
+                  variant="secondary" 
+                  className="w-full rounded-full bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 text-white"
                 >
                   <User className="h-4 w-4 mr-2" />
                   Sign in

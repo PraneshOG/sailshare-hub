@@ -14,6 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { cn } from '@/lib/utils';
 
 interface SearchBarProps {
@@ -29,9 +31,18 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
   const [tripType, setTripType] = useState('round-trip');
   const [departureDate, setDepartureDate] = useState<Date | undefined>(undefined);
   const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
-  const [passengerType, setPassengerType] = useState('Adult');
   const [passengerCount, setPassengerCount] = useState(1);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [cabinClass, setCabinClass] = useState('economy');
+  
+  // Multiple passenger types with counts
+  const [passengers, setPassengers] = useState({
+    adult: 1,
+    child: 0,
+    infant: 0,
+    senior: 0,
+    student: 0
+  });
 
   // Mock data for calendar price indicators
   const priceTiers = {
@@ -41,13 +52,19 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
   };
 
   const handleSearch = () => {
+    // Create a more structured passenger object
+    const passengersData = Object.entries(passengers)
+      .filter(([_, count]) => count > 0)
+      .map(([type, count]) => ({ type, count }));
+
     const searchData = {
       from: searchLocation,
       to: searchDestination,
       departure: departureDate ? format(departureDate, 'yyyy-MM-dd') : '',
       return: returnDate && tripType === 'round-trip' ? format(returnDate, 'yyyy-MM-dd') : '',
       tripType,
-      passengers: `${passengerCount} ${passengerType}`
+      passengers: passengersData,
+      cabinClass
     };
 
     if (onSearch) {
@@ -62,26 +79,24 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
     if (departureDate) params.append('departure', format(departureDate, 'yyyy-MM-dd'));
     if (returnDate && tripType === 'round-trip') params.append('return', format(returnDate, 'yyyy-MM-dd'));
     params.append('tripType', tripType);
-    params.append('passengers', `${passengerCount} ${passengerType}`);
+    params.append('cabinClass', cabinClass);
+    params.append('passengers', JSON.stringify(passengersData));
     
     navigate(`/boats?${params.toString()}`);
   };
 
-  const incrementPassenger = () => {
-    setPassengerCount(prev => Math.min(prev + 1, 10));
-  };
-
-  const decrementPassenger = () => {
-    setPassengerCount(prev => Math.max(prev - 1, 1));
-  };
-
-  // Function to determine day price tier
-  const getDayPriceTier = (date: Date) => {
-    const day = date.getDate();
-    if (priceTiers.low.includes(day)) return 'low';
-    if (priceTiers.medium.includes(day)) return 'medium';
-    if (priceTiers.high.includes(day)) return 'high';
-    return 'normal';
+  // Handle passenger count changes
+  const updatePassengerCount = (type: keyof typeof passengers, change: number) => {
+    setPassengers(prev => {
+      const newCount = Math.max(0, prev[type] + change);
+      // Adults must be at least 1
+      if (type === 'adult' && newCount === 0) return prev;
+      
+      return {
+        ...prev,
+        [type]: newCount
+      };
+    });
   };
 
   // Price indicators for the color-coding legend
@@ -154,6 +169,15 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
     );
   };
 
+  // Function to determine day price tier
+  const getDayPriceTier = (date: Date) => {
+    const day = date.getDate();
+    if (priceTiers.low.includes(day)) return 'low';
+    if (priceTiers.medium.includes(day)) return 'medium';
+    if (priceTiers.high.includes(day)) return 'high';
+    return 'normal';
+  };
+
   // Custom dual-month calendar component
   const DualMonthCalendar = ({ selectedDate, onDateSelect, calendarType }: { 
     selectedDate: Date | undefined, 
@@ -180,7 +204,8 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
       <div className="p-2 bg-white">
         <CalendarHeader currentMonth={currentMonth} />
         
-        <div className="flex justify-between mb-2">
+        {/* Price indicator legend moved inside the calendar */}
+        <div className="flex justify-between mb-2 px-2">
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 bg-green-100"></div>
             <span className="text-xs">Low</span>
@@ -245,6 +270,9 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
       </div>
     );
   };
+
+  // Calculate total passengers
+  const totalPassengers = Object.values(passengers).reduce((sum, count) => sum + count, 0);
 
   return (
     <div className={`bg-white rounded-xl shadow-lg max-w-4xl mx-auto p-4 border border-gray-200`}>
@@ -350,64 +378,183 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
                   >
                     <Users className="h-3 w-3 text-gray-400 mr-1" />
                     <span className="truncate">
-                      {passengerCount} {passengerType}
+                      {totalPassengers} Passenger{totalPassengers !== 1 ? 's' : ''}
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64 p-3 bg-white">
+                <DropdownMenuContent className="w-72 p-3 bg-white">
                   <div className="space-y-3">
+                    <div className="text-sm font-medium mb-2">Passengers</div>
+                    
+                    {/* Adult passengers */}
                     <div className="flex justify-between items-center">
                       <div>
-                        <p className="text-sm font-medium">Passengers</p>
+                        <p className="text-sm">Adults</p>
+                        <p className="text-xs text-gray-500">Age 18+</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <Button 
                           variant="outline" 
                           size="icon" 
                           className="h-7 w-7" 
-                          onClick={decrementPassenger}
-                          disabled={passengerCount <= 1}
+                          onClick={() => updatePassengerCount('adult', -1)}
+                          disabled={passengers.adult <= 1} // At least 1 adult required
                         >
                           -
                         </Button>
-                        <span className="w-5 text-center">{passengerCount}</span>
+                        <span className="w-5 text-center">{passengers.adult}</span>
                         <Button 
                           variant="outline" 
                           size="icon" 
                           className="h-7 w-7" 
-                          onClick={incrementPassenger}
-                          disabled={passengerCount >= 10}
+                          onClick={() => updatePassengerCount('adult', 1)}
+                          disabled={passengers.adult >= 9}
                         >
                           +
                         </Button>
                       </div>
                     </div>
-                    <div className="space-y-1">
-                      <div className="text-xs font-medium text-gray-500 mb-1">Passenger Type</div>
-                      <DropdownMenuItem 
-                        onClick={() => setPassengerType('Adult')}
-                        className={`${passengerType === 'Adult' ? 'bg-gray-100' : ''}`}
+                    
+                    {/* Child passengers */}
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-sm">Children</p>
+                        <p className="text-xs text-gray-500">Age 2-17</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="h-7 w-7" 
+                          onClick={() => updatePassengerCount('child', -1)}
+                          disabled={passengers.child <= 0}
+                        >
+                          -
+                        </Button>
+                        <span className="w-5 text-center">{passengers.child}</span>
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="h-7 w-7" 
+                          onClick={() => updatePassengerCount('child', 1)}
+                          disabled={passengers.child >= 9}
+                        >
+                          +
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Infant passengers */}
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-sm">Infants</p>
+                        <p className="text-xs text-gray-500">Under 2</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="h-7 w-7" 
+                          onClick={() => updatePassengerCount('infant', -1)}
+                          disabled={passengers.infant <= 0}
+                        >
+                          -
+                        </Button>
+                        <span className="w-5 text-center">{passengers.infant}</span>
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="h-7 w-7" 
+                          onClick={() => updatePassengerCount('infant', 1)}
+                          disabled={passengers.infant >= 4}
+                        >
+                          +
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Senior passengers */}
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-sm">Seniors</p>
+                        <p className="text-xs text-gray-500">Age 65+</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="h-7 w-7" 
+                          onClick={() => updatePassengerCount('senior', -1)}
+                          disabled={passengers.senior <= 0}
+                        >
+                          -
+                        </Button>
+                        <span className="w-5 text-center">{passengers.senior}</span>
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="h-7 w-7" 
+                          onClick={() => updatePassengerCount('senior', 1)}
+                          disabled={passengers.senior >= 9}
+                        >
+                          +
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Student passengers */}
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-sm">Students</p>
+                        <p className="text-xs text-gray-500">Valid ID required</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="h-7 w-7" 
+                          onClick={() => updatePassengerCount('student', -1)}
+                          disabled={passengers.student <= 0}
+                        >
+                          -
+                        </Button>
+                        <span className="w-5 text-center">{passengers.student}</span>
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="h-7 w-7" 
+                          onClick={() => updatePassengerCount('student', 1)}
+                          disabled={passengers.student >= 9}
+                        >
+                          +
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-3 border-t border-gray-200">
+                      <div className="text-sm font-medium mb-2">Cabin Class</div>
+                      <RadioGroup 
+                        defaultValue={cabinClass}
+                        className="flex flex-col gap-2"
+                        onValueChange={setCabinClass}
                       >
-                        Adult
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => setPassengerType('Youth')}
-                        className={`${passengerType === 'Youth' ? 'bg-gray-100' : ''}`}
-                      >
-                        Youth
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => setPassengerType('Student')}
-                        className={`${passengerType === 'Student' ? 'bg-gray-100' : ''}`}
-                      >
-                        Student
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => setPassengerType('Other')}
-                        className={`${passengerType === 'Other' ? 'bg-gray-100' : ''}`}
-                      >
-                        Other
-                      </DropdownMenuItem>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="economy" id="economy" />
+                          <Label htmlFor="economy">Economy</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="premium" id="premium" />
+                          <Label htmlFor="premium">Premium Economy</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="business" id="business" />
+                          <Label htmlFor="business">Business Class</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="first" id="first" />
+                          <Label htmlFor="first">First Class</Label>
+                        </div>
+                      </RadioGroup>
                     </div>
                   </div>
                 </DropdownMenuContent>
@@ -426,19 +573,6 @@ const SearchBar = ({ compact = false, hideOnNonHomePage = false, onSearch }: Sea
           </div>
         </div>
       </Tabs>
-
-      {/* Price legend below the search form */}
-      <div className="mt-4 grid grid-cols-3 gap-2">
-        <div className="flex items-center justify-center text-xs bg-green-100 py-1 px-2 rounded">
-          <span className="font-medium mr-1">Low price:</span> {priceIndicators.low}
-        </div>
-        <div className="flex items-center justify-center text-xs bg-amber-100 py-1 px-2 rounded">
-          <span className="font-medium mr-1">Medium price:</span> {priceIndicators.medium}
-        </div>
-        <div className="flex items-center justify-center text-xs bg-red-100 py-1 px-2 rounded">
-          <span className="font-medium mr-1">High price:</span> {priceIndicators.high}
-        </div>
-      </div>
     </div>
   );
 };
