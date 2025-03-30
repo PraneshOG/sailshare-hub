@@ -15,6 +15,20 @@ const SearchBar = () => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [guests, setGuests] = useState('');
 
+  // Function to get random price level class for a date
+  const getPriceLevelClass = (date: Date) => {
+    // Use the date to deterministically generate a price level (based on day of month)
+    const day = date.getDate();
+    
+    if (day % 3 === 0) {
+      return "bg-[#F2FCE2] hover:bg-[#E5F6C5] text-emerald-800"; // Low price
+    } else if (day % 3 === 1) {
+      return "bg-[#FEF7CD] hover:bg-[#F9EDB5] text-amber-800"; // Medium price
+    } else {
+      return "bg-[#FEC6A1] hover:bg-[#F9B58A] text-orange-800"; // High price
+    }
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -63,9 +77,19 @@ const SearchBar = () => {
                     onSelect={setDate}
                     initialFocus
                     className="p-3 pointer-events-auto"
+                    modifiers={{
+                      low: (date) => date.getDate() % 3 === 0,
+                      medium: (date) => date.getDate() % 3 === 1,
+                      high: (date) => date.getDate() % 3 === 2
+                    }}
+                    modifiersClassNames={{
+                      low: "bg-[#F2FCE2] border border-[#C5E8A5]",
+                      medium: "bg-[#FEF7CD] border border-[#F9E896]",
+                      high: "bg-[#FEC6A1] border border-[#F9A06C]"
+                    }}
                     classNames={{
                       day_selected: "bg-ocean-600 text-white hover:bg-ocean-500 hover:text-white focus:bg-ocean-600 focus:text-white",
-                      day_today: "bg-ocean-100 text-ocean-800",
+                      day_today: "bg-ocean-100 text-ocean-800 font-bold",
                       day: "hover:bg-ocean-100 hover:text-ocean-800",
                       head_cell: "text-ocean-600 font-semibold",
                       caption: "text-ocean-800 font-medium",
