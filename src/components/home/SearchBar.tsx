@@ -14,10 +14,22 @@ const SearchBar = () => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [guests, setGuests] = useState('');
 
-  // Function to get random price tiers for dates
-  const getPriceTiers = () => {
-    const tiers = ["low", "medium", "high"];
-    return tiers[Math.floor(Math.random() * tiers.length)];
+  const priceTiers = ["low", "medium", "high"];
+
+  // Function to get price levels for dates
+  const getPriceTiers = (date: Date) => {
+    // Low price days (green)
+      if (date.getDate() % 3 === 0) {
+        return "low";
+      } 
+      // Medium price days (amber)
+      else if (date.getDate() % 3 === 1) {
+        return "medium";
+      } 
+      // High price days (purple)
+      else{
+        return "high";
+      }
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -32,11 +44,10 @@ const SearchBar = () => {
     navigate(`/boats?${params.toString()}`);
   };
 
-  // Define a mapping of price tiers to colors
   const tierColors = {
-    low: "#12B981",      // Green
-    medium: "#F8CB45",   // Amber
-    high: "#FF6B6B",    // Red (Corrected from Purple)
+    low: "#12B981",
+    medium: "#F8CB45",
+    high: "#FF6B6B",
   };
 
   // Get unique price tiers used in the current month
@@ -45,7 +56,7 @@ const SearchBar = () => {
     const uniqueTiers = new Set<string>();
 
     for (let i = 1; i <= daysInMonth; i++) {
-      uniqueTiers.add(getPriceTiers());
+      uniqueTiers.add(getPriceTiers(new Date(month.getFullYear(), month.getMonth(), i)));
     }
 
     return Array.from(uniqueTiers);
@@ -97,9 +108,9 @@ const SearchBar = () => {
                     className="p-3 pointer-events-auto"
                     onMonthChange={handleMonthChange} // Call handleMonthChange when the month changes
                     modifiers={{
-                      low: (date) => getPriceTiers() === "low",
-                      medium: (date) => getPriceTiers() === "medium",
-                      high: (date) => getPriceTiers() === "high"
+                      low: (date) => getPriceTiers(date) === "low",
+                      medium: (date) => getPriceTiers(date) === "medium",
+                      high: (date) => getPriceTiers(date) === "high"
                     }}
                     modifiersClassNames={{
                       low: "bg-[#12B981]/20 border-0 text-black font-medium",
