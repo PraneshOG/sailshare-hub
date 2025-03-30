@@ -61,6 +61,16 @@ const SearchBar = () => {
                   onSelect={setDate}
                   initialFocus
                   className="p-3 pointer-events-auto"
+                  classNames={{
+                    day_selected: "bg-ocean-600 text-white hover:bg-ocean-500 hover:text-white focus:bg-ocean-600 focus:text-white",
+                    day_today: "bg-ocean-100 text-ocean-800",
+                    day: "hover:bg-ocean-100 hover:text-ocean-800",
+                    head_cell: "text-ocean-600 font-semibold",
+                    caption: "text-ocean-800 font-medium",
+                    nav_button: "border border-ocean-200 bg-white hover:bg-ocean-50",
+                    table: "border-collapse space-y-1",
+                    cell: "p-0 relative [&:has([aria-selected])]:bg-ocean-50 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md",
+                  }}
                 />
               </PopoverContent>
             </Popover>
