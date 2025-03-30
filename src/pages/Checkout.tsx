@@ -141,7 +141,7 @@ const Checkout = () => {
         .insert({
           user_id: user.id,
           boat_id: bookingDetails.boatId,
-          boat_name: bookingDetails.boatName,
+          boat_name: "", // Don't store boat name
           date: bookingDetails.date,
           time: bookingDetails.time,
           duration: bookingDetails.duration,
@@ -243,37 +243,27 @@ const Checkout = () => {
                 {/* Booking Summary */}
                 <div className="lg:col-span-1">
                   <div className="bg-white rounded-xl shadow-sm p-6 sticky top-24">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">Booking Summary</h2>
-                    
-                    <div className="mb-4">
-                      <img 
-                        src={bookingDetails.boatImage} 
-                        alt={bookingDetails.boatName}
-                        className="w-full h-40 object-cover rounded-lg"
-                      />
-                    </div>
-                    
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">{bookingDetails.boatName}</h3>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4">Journey Summary</h2>
                     
                     <div className="space-y-3 mb-6">
                       <div className="flex items-center gap-2 text-gray-700">
                         <Calendar className="h-4 w-4 text-ocean-600" />
-                        <span>{formatDate(bookingDetails.date)}</span>
+                        <span>{formatDate(bookingDetails?.date || '')}</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-700">
                         <Clock className="h-4 w-4 text-ocean-600" />
-                        <span>{bookingDetails.time} • {bookingDetails.duration} {bookingDetails.duration === 1 ? 'hour' : 'hours'}</span>
+                        <span>{bookingDetails?.time} • {bookingDetails?.duration} {bookingDetails?.duration === 1 ? 'hour' : 'hours'}</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-700">
                         <Users className="h-4 w-4 text-ocean-600" />
-                        <span>{bookingDetails.guestCount} {bookingDetails.guestCount === 1 ? 'guest' : 'guests'}</span>
+                        <span>{bookingDetails?.guestCount} {bookingDetails?.guestCount === 1 ? 'guest' : 'guests'}</span>
                       </div>
                     </div>
                     
                     <div className="border-t border-gray-100 pt-4">
                       <div className="flex justify-between mb-2">
-                        <span className="text-gray-600">₹{bookingDetails.price.toLocaleString('en-IN')} × {bookingDetails.duration} hours</span>
-                        <span className="font-medium">₹{(bookingDetails.price * bookingDetails.duration).toLocaleString('en-IN')}</span>
+                        <span className="text-gray-600">₹{bookingDetails?.price.toLocaleString('en-IN')} × {bookingDetails?.duration} hours</span>
+                        <span className="font-medium">₹{bookingDetails ? (bookingDetails.price * bookingDetails.duration).toLocaleString('en-IN') : ''}</span>
                       </div>
                       <div className="flex justify-between mb-2">
                         <span className="text-gray-600">Cleaning fee</span>
@@ -285,7 +275,7 @@ const Checkout = () => {
                       </div>
                       <div className="flex justify-between font-bold text-lg border-t border-gray-100 pt-3 mt-3">
                         <span>Total</span>
-                        <span>₹{bookingDetails.totalPrice.toLocaleString('en-IN')}</span>
+                        <span>₹{bookingDetails?.totalPrice.toLocaleString('en-IN')}</span>
                       </div>
                     </div>
                   </div>
@@ -302,11 +292,10 @@ const Checkout = () => {
                 </div>
                 
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Booking Confirmed!</h2>
-                <p className="text-gray-600 mb-6">Your booking has been successfully completed.</p>
+                <p className="text-gray-600 mb-6">Your journey has been successfully booked.</p>
                 
                 <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Booking Details</h3>
-                  <p className="text-gray-700 mb-1"><strong>Boat:</strong> {bookingDetails?.boatName}</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Journey Details</h3>
                   <p className="text-gray-700 mb-1"><strong>Date:</strong> {bookingDetails ? formatDate(bookingDetails.date) : ''}</p>
                   <p className="text-gray-700 mb-1"><strong>Time:</strong> {bookingDetails?.time}</p>
                   <p className="text-gray-700 mb-1"><strong>Duration:</strong> {bookingDetails?.duration} {bookingDetails?.duration === 1 ? 'hour' : 'hours'}</p>
@@ -352,7 +341,6 @@ const Checkout = () => {
                     <QRCodeGenerator 
                       value={JSON.stringify({
                         ticketId,
-                        boatName: bookingDetails?.boatName,
                         date: bookingDetails?.date,
                         time: bookingDetails?.time,
                         guestCount: bookingDetails?.guestCount,

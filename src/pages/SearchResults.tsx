@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { fetchBoats, Boat } from '@/integrations/supabase/services';
-import { Sliders, Search, AlertCircle, Ship, ArrowRight, Calendar, Users } from 'lucide-react';
+import { AlertCircle, ArrowRight, Calendar, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from 'date-fns';
@@ -16,6 +16,7 @@ const SearchResultsPage = () => {
   const { toast } = useToast();
   const [boats, setBoats] = useState<Boat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedDeparture, setSelectedDeparture] = useState<string | null>(null);
   
   // Parse query parameters
   const params = new URLSearchParams(location.search);
@@ -77,21 +78,43 @@ const SearchResultsPage = () => {
   // Calculate total passengers
   const totalPassengers = passengers.reduce((sum, p) => sum + p.count, 0);
 
-  const handleSelectBoat = (boat) => {
-    // Create booking details to pass to checkout
+  const handleSelectJourney = (index: number, journeyType: 'departure' | 'return') => {
+    // For departure journey in round trip, just save the selection
+    if (tripType === 'round-trip' && journeyType === 'departure') {
+      setSelectedDeparture(`journey-${index}`);
+      return;
+    }
+    
+    // For one-way or return journey, proceed to checkout
+    const timeDetails = generateTimeDetails(index);
+    
+    // Create booking details to pass to checkout without boat name
     const bookingDetails = {
-      boatId: boat.id,
-      boatName: boat.name,
-      boatImage: boat.images[0],
-      date: departureParam || new Date().toISOString().split('T')[0],
-      time: "09:00 AM", // Default time, in real app this would be selected
+      boatId: boats.length > 0 ? boats[0].id : "", // Just use the first boat
+      boatName: "", // No longer showing boat name
+      boatImage: boats.length > 0 ? boats[0].images[0] : "",
+      date: journeyType === 'return' ? returnParam : departureParam,
+      time: timeDetails.departureTime,
       duration: 4, // Default duration in hours
       guestCount: totalPassengers,
-      price: boat.price_per_hour,
-      totalPrice: boat.price_per_hour * 4 + 800 // 4 hours + fees
+      price: boats.length > 0 ? boats[0].price_per_hour : 0,
+      totalPrice: (boats.length > 0 ? boats[0].price_per_hour : 0) * 4 + 800 // 4 hours + fees
     };
     
     navigate('/checkout', { state: bookingDetails });
+  };
+  
+  // Generate pseudo-random departure/arrival times based on index
+  const generateTimeDetails = (index: number) => {
+    const hour = 7 + (index * 3) % 12;
+    const period = hour > 11 ? "PM" : "AM";
+    const departureTime = `${hour === 0 ? 12 : hour}:00 ${period}`;
+    const arrivalTime = `${(hour + 2) % 12 === 0 ? 12 : (hour + 2) % 12}:30 ${period}`;
+    
+    return {
+      departureTime,
+      arrivalTime
+    };
   };
 
   return (
@@ -106,14 +129,12 @@ const SearchResultsPage = () => {
               <div className="flex items-center gap-2 text-white">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                   <div className="flex items-center">
-                    <Ship className="h-5 w-5 text-blue-300 mr-2" />
                     <span className="font-medium">{fromParam}</span>
                   </div>
                   
                   <ArrowRight className="hidden sm:block h-4 w-4 text-blue-300 mx-1" />
                   
                   <div className="flex items-center">
-                    <Ship className="h-5 w-5 text-blue-300 mr-2" />
                     <span className="font-medium">{toParam}</span>
                   </div>
                 </div>
@@ -159,12 +180,12 @@ const SearchResultsPage = () => {
                 <TabsList>
                   <TabsTrigger value="departure" className="text-sm">Departure</TabsTrigger>
                   {tripType === 'round-trip' && (
-                    <TabsTrigger value="return" className="text-sm">Return</TabsTrigger>
+                    <TabsTrigger value="return" className="text-sm" disabled={!selectedDeparture}>Return</TabsTrigger>
                   )}
                 </TabsList>
                 
                 <div className="text-sm text-gray-500">
-                  {boats.length} result{boats.length !== 1 ? 's' : ''}
+                  {isLoading ? 'Loading...' : `${boats.length > 0 ? 5 : 0} journeys available`}
                 </div>
               </div>
               
@@ -177,28 +198,19 @@ const SearchResultsPage = () => {
                   </div>
                 ) : boats.length > 0 ? (
                   <div className="space-y-4">
-                    {boats.map((boat, index) => {
-                      // Generate pseudo-random departure times
-                      const hour = 7 + (index * 3) % 12;
-                      const period = hour > 11 ? "PM" : "AM";
-                      const departureTime = `${hour === 0 ? 12 : hour}:00 ${period}`;
-                      const arrivalTime = `${(hour + 2) % 12 === 0 ? 12 : (hour + 2) % 12}:30 ${period}`;
+                    {[...Array(5)].map((_, index) => {
+                      const { departureTime, arrivalTime } = generateTimeDetails(index);
                       
                       return (
                         <div 
-                          key={boat.id} 
-                          className="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all duration-300 bg-white"
+                          key={`journey-${index}`}
+                          className={`border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all duration-300 bg-white ${
+                            selectedDeparture === `journey-${index}` ? 'ring-2 ring-blue-400' : ''
+                          }`}
                         >
                           <div className="grid grid-cols-12 gap-4 items-center">
-                            {/* Left: Boat icon */}
-                            <div className="col-span-2 lg:col-span-1">
-                              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <Ship className="h-6 w-6 text-indigo-600" />
-                              </div>
-                            </div>
-                            
                             {/* Middle: Times and route */}
-                            <div className="col-span-6 lg:col-span-8">
+                            <div className="col-span-8 lg:col-span-9">
                               <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                                 <div className="flex items-center gap-3">
                                   <div className="text-center">
@@ -222,11 +234,11 @@ const SearchResultsPage = () => {
                                 
                                 <div className="mt-2 md:mt-0">
                                   <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                                    {boat.capacity} seats available
+                                    {Math.floor(Math.random() * 20) + 10} seats available
                                   </span>
                                   
                                   <div className="text-xs text-gray-500 mt-1">
-                                    {boat.type} • Cabin: {cabinClass}
+                                    Cabin: {cabinClass}
                                   </div>
                                 </div>
                               </div>
@@ -236,15 +248,15 @@ const SearchResultsPage = () => {
                             <div className="col-span-4 lg:col-span-3 flex flex-col items-end justify-between">
                               <div className="text-right">
                                 <p className="text-sm text-gray-500">From</p>
-                                <p className="text-xl font-semibold">฿{boat.price_per_hour.toLocaleString()}</p>
+                                <p className="text-xl font-semibold">฿{(1000 + index * 200).toLocaleString()}</p>
                                 <p className="text-sm text-gray-500">per person</p>
                               </div>
                               
                               <Button 
                                 className="bg-red-500 hover:bg-red-600 text-white"
-                                onClick={() => handleSelectBoat(boat)}
+                                onClick={() => handleSelectJourney(index, 'departure')}
                               >
-                                Select
+                                {tripType === 'round-trip' ? 'Select' : 'Book Now'}
                               </Button>
                             </div>
                           </div>
@@ -255,9 +267,9 @@ const SearchResultsPage = () => {
                 ) : (
                   <div className="text-center py-16 bg-gray-50 rounded-xl">
                     <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-800 mb-2">No boats found</h3>
+                    <h3 className="text-xl font-semibold text-gray-800 mb-2">No journeys found</h3>
                     <p className="text-gray-600 max-w-md mx-auto">
-                      We couldn't find any boats matching your search criteria. Try adjusting your search parameters.
+                      We couldn't find any journeys matching your search criteria. Try adjusting your search parameters.
                     </p>
                     <Button 
                       variant="outline" 
@@ -272,11 +284,79 @@ const SearchResultsPage = () => {
               
               {tripType === 'round-trip' && (
                 <TabsContent value="return" className="mt-2">
-                  <div className="text-center py-12 bg-gray-50 rounded-xl">
-                    <p className="text-gray-600">
-                      Please select your departure boat first to view return options.
-                    </p>
-                  </div>
+                  {selectedDeparture ? (
+                    <div className="space-y-4">
+                      {[...Array(3)].map((_, index) => {
+                        const { departureTime, arrivalTime } = generateTimeDetails(index + 2);
+                        
+                        return (
+                          <div 
+                            key={`return-journey-${index}`}
+                            className="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all duration-300 bg-white"
+                          >
+                            <div className="grid grid-cols-12 gap-4 items-center">
+                              {/* Middle: Times and route */}
+                              <div className="col-span-8 lg:col-span-9">
+                                <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <div className="text-center">
+                                      <div className="text-lg font-semibold">{departureTime}</div>
+                                      <div className="text-xs text-gray-500">{toParam}</div>
+                                    </div>
+                                    
+                                    <div className="flex flex-col items-center">
+                                      <div className="text-xs text-gray-500">2h 30m</div>
+                                      <div className="relative w-16 md:w-24">
+                                        <div className="border-t border-gray-300 absolute top-1/2 w-full"></div>
+                                        <ArrowRight className="h-4 w-4 text-gray-400 absolute top-1/2 right-0 transform -translate-y-1/2" />
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="text-center">
+                                      <div className="text-lg font-semibold">{arrivalTime}</div>
+                                      <div className="text-xs text-gray-500">{fromParam}</div>
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="mt-2 md:mt-0">
+                                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                      {Math.floor(Math.random() * 20) + 10} seats available
+                                    </span>
+                                    
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      Cabin: {cabinClass}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Right: Price and CTA */}
+                              <div className="col-span-4 lg:col-span-3 flex flex-col items-end justify-between">
+                                <div className="text-right">
+                                  <p className="text-sm text-gray-500">From</p>
+                                  <p className="text-xl font-semibold">฿{(800 + index * 300).toLocaleString()}</p>
+                                  <p className="text-sm text-gray-500">per person</p>
+                                </div>
+                                
+                                <Button 
+                                  className="bg-red-500 hover:bg-red-600 text-white"
+                                  onClick={() => handleSelectJourney(index, 'return')}
+                                >
+                                  Book Now
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 bg-gray-50 rounded-xl">
+                      <p className="text-gray-600">
+                        Please select your departure journey first to view return options.
+                      </p>
+                    </div>
+                  )}
                 </TabsContent>
               )}
             </Tabs>
