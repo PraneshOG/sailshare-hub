@@ -39,27 +39,18 @@ const SearchBar = () => {
     navigate(`/boats?${params.toString()}`);
   };
 
-  const tierColors = {
-    low: "#F8CB45",
-    medium: "#F8CB45",
-    high: "#8A3FFC",
+  const uniquePriceTiers = Array.from(new Set(["low", "medium", "high"]));
+
+  // Add custom classes based on price tiers
+  const modifiersClassNames = {
+    low: "bg-amber-300 text-black font-medium rounded-md",
+    medium: "bg-amber-300 text-black font-medium rounded-md",
+    high: "bg-purple-600 text-white font-medium rounded-md",
   };
 
-  const getUniquePriceTiers = (month: Date) => {
-    const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
-    const uniqueTiers = new Set<string>();
-
-    for (let i = 1; i <= daysInMonth; i++) {
-      uniqueTiers.add(getPriceTiers(new Date(month.getFullYear(), month.getMonth(), i)));
-    }
-
-    return Array.from(uniqueTiers);
-  };
-
-  const [uniquePriceTiers, setUniquePriceTiers] = useState<string[]>([]);
-
-  const handleMonthChange = (month: Date) => {
-    setUniquePriceTiers(getUniquePriceTiers(month));
+  const dayClassName = (date: Date) => {
+    const tier = getPriceTiers(date);
+    return modifiersClassNames[tier as keyof typeof modifiersClassNames] || "";
   };
 
   return (
@@ -98,44 +89,29 @@ const SearchBar = () => {
                     onSelect={setDate}
                     initialFocus
                     className="p-3 pointer-events-auto"
-                    onMonthChange={handleMonthChange}
-                    styles={{
-                      day_low: { backgroundColor: "#F8CB45", color: "black", fontWeight: "500", borderRadius: "0.375rem" },
-                      day_medium: { backgroundColor: "#F8CB45", color: "black", fontWeight: "500", borderRadius: "0.375rem" },
-                      day_high: { backgroundColor: "#8A3FFC", color: "white", fontWeight: "500", borderRadius: "0.375rem" }
-                    }}
                     modifiers={{
                       low: (date) => getPriceTiers(date) === 'low',
                       medium: (date) => getPriceTiers(date) === 'medium',
                       high: (date) => getPriceTiers(date) === 'high',
                     }}
-                    modifiersStyles={{
-                      low: { backgroundColor: "#F8CB45", color: "black", fontWeight: "500", borderRadius: "0.375rem" },
-                      medium: { backgroundColor: "#F8CB45", color: "black", fontWeight: "500", borderRadius: "0.375rem" },
-                      high: { backgroundColor: "#8A3FFC", color: "white", fontWeight: "500", borderRadius: "0.375rem" }
-                    }}
-                    classNames={{
-                      day: (date) => {
-                        const tier = getPriceTiers(date);
-                        if (tier === 'low') return "bg-[#F8CB45] text-black font-medium rounded-md";
-                        if (tier === 'medium') return "bg-[#F8CB45] text-black font-medium rounded-md";
-                        if (tier === 'high') return "bg-[#8A3FFC] text-white font-medium rounded-md";
-                        return "";
-                      }
+                    modifiersClassNames={{
+                      low: "bg-amber-300 text-black font-medium rounded-md",
+                      medium: "bg-amber-300 text-black font-medium rounded-md",
+                      high: "bg-purple-600 text-white font-medium rounded-md",
                     }}
                   />
                   {/* Price Legend */}
                   <div className="p-3 border-t border-gray-200 flex items-center justify-around">
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-[#F8CB45] rounded"></div>
+                      <div className="w-4 h-4 bg-amber-300 rounded"></div>
                       <span className="text-xs">₹14,000+</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-[#F8CB45] rounded"></div>
+                      <div className="w-4 h-4 bg-amber-300 rounded"></div>
                       <span className="text-xs">₹18,000+</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-[#8A3FFC] rounded"></div>
+                      <div className="w-4 h-4 bg-purple-600 rounded"></div>
                       <span className="text-xs">₹24,000+</span>
                     </div>
                   </div>

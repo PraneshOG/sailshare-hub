@@ -16,7 +16,9 @@ export default {
 		"text-black",
 		"text-white",
 		"font-medium",
-		"rounded-md"
+		"rounded-md",
+		"bg-amber-300",
+		"bg-purple-600"
 	],
 	theme: {
 		container: {

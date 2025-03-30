@@ -34,7 +34,7 @@ const Navbar = () => {
           className="flex items-center gap-2 text-2xl font-bold text-white transition-all duration-300"
         >
           <Ship className="h-8 w-8 text-orange-500" />
-          <span className="hidden sm:inline gradient-text bg-gradient-to-r from-red-500 to-orange-500 text-transparent bg-clip-text">SailShare</span>
+          <span className="hidden sm:inline gradient-text bg-gradient-to-r from-red-500 to-orange-500 text-transparent bg-clip-text">AsterTech Book Now</span>
         </Link>
 
         {/* Desktop Actions */}

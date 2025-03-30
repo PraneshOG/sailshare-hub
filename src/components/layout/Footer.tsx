@@ -38,7 +38,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/coupon-codes" className="text-gray-300 hover:text-white transition-colors">
-                  SailShare coupon codes
+                  AsterTech Book Now coupon codes
                 </Link>
               </li>
             </ul>
@@ -72,12 +72,12 @@ const Footer = () => {
             <ul className="space-y-2">
               <li>
                 <Link to="/fees" className="text-gray-300 hover:text-white transition-colors">
-                  Boat fees
+                  Booking fees
                 </Link>
               </li>
               <li>
                 <Link to="/boats" className="text-gray-300 hover:text-white transition-colors">
-                  Boats
+                  Booking options
                 </Link>
               </li>
             </ul>
@@ -85,7 +85,7 @@ const Footer = () => {
           
           {/* App Download */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-white">Get the SailShare app</h3>
+            <h3 className="text-lg font-semibold mb-4 text-white">Get the AsterTech Book Now app</h3>
             <div className="flex flex-col space-y-3">
               <a href="#" className="block">
                 <img 
@@ -107,7 +107,7 @@ const Footer = () => {
         
         <div className="border-t border-purple-900 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center text-sm">
           <div className="mb-4 md:mb-0">
-            <p>©2023 SailShare</p>
+            <p>©2023 AsterTech Book Now</p>
           </div>
           
           <div className="flex space-x-6 mb-4 md:mb-0">
