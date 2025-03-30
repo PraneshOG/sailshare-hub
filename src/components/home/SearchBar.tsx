@@ -83,19 +83,23 @@ const SearchBar = () => {
                       high: (date) => date.getDate() % 3 === 2
                     }}
                     modifiersClassNames={{
-                      low: "bg-[#F2FCE2] border border-[#C5E8A5]",
-                      medium: "bg-[#FEF7CD] border border-[#F9E896]",
-                      high: "bg-[#FEC6A1] border border-[#F9A06C]"
+                      low: "bg-green-100 border border-green-300 font-medium",
+                      medium: "bg-amber-100 border border-amber-300 font-medium",
+                      high: "bg-red-100 border border-red-300 font-medium"
                     }}
                     classNames={{
                       day_selected: "bg-ocean-600 text-white hover:bg-ocean-500 hover:text-white focus:bg-ocean-600 focus:text-white",
-                      day_today: "bg-ocean-100 text-ocean-800 font-bold",
-                      day: "hover:bg-ocean-100 hover:text-ocean-800",
+                      day_today: "text-ocean-800 font-bold ring-2 ring-ocean-500",
+                      day: "hover:bg-ocean-100 hover:text-ocean-800 text-sm aria-selected:opacity-100",
                       head_cell: "text-ocean-600 font-semibold",
                       caption: "text-ocean-800 font-medium",
                       nav_button: "border border-ocean-200 bg-white hover:bg-ocean-50",
                       table: "border-collapse space-y-1",
-                      cell: "p-0 relative [&:has([aria-selected])]:bg-ocean-50 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md",
+                      cell: "p-0 relative [&:has([aria-selected])]:bg-ocean-50 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                      row: "flex w-full mt-2",
+                      head_row: "flex",
+                      months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                      month: "space-y-4",
                     }}
                   />
                   {/* Price Legend */}
@@ -103,15 +107,15 @@ const SearchBar = () => {
                     <p className="text-sm font-medium text-gray-700 mb-2">Price Legend:</p>
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center">
-                        <div className="w-4 h-4 rounded-full bg-[#F2FCE2] border border-[#C5E8A5] mr-1.5"></div>
+                        <div className="w-4 h-4 rounded-full bg-green-100 border border-green-300 mr-1.5"></div>
                         <span className="text-xs text-gray-600">Low</span>
                       </div>
                       <div className="flex items-center">
-                        <div className="w-4 h-4 rounded-full bg-[#FEF7CD] border border-[#F9E896] mr-1.5"></div>
+                        <div className="w-4 h-4 rounded-full bg-amber-100 border border-amber-300 mr-1.5"></div>
                         <span className="text-xs text-gray-600">Medium</span>
                       </div>
                       <div className="flex items-center">
-                        <div className="w-4 h-4 rounded-full bg-[#FEC6A1] border border-[#F9A06C] mr-1.5"></div>
+                        <div className="w-4 h-4 rounded-full bg-red-100 border border-red-300 mr-1.5"></div>
                         <span className="text-xs text-gray-600">High</span>
                       </div>
                     </div>
