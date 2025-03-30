@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { fetchBoats, Boat } from '@/integrations/supabase/services';
+import { fetchBoats, Boat, JourneyDetails } from '@/integrations/supabase/services';
 import { AlertCircle, ArrowRight, Calendar, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,6 +16,7 @@ const SearchResultsPage = () => {
   const [boats, setBoats] = useState<Boat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDeparture, setSelectedDeparture] = useState<string | null>(null);
+  const [selectedDepartureDetails, setSelectedDepartureDetails] = useState<JourneyDetails | null>(null);
   
   // Parse query parameters
   const params = new URLSearchParams(location.search);
@@ -79,26 +79,50 @@ const SearchResultsPage = () => {
   const totalPassengers = passengers.reduce((sum, p) => sum + p.count, 0);
 
   const handleSelectJourney = (index: number, journeyType: 'departure' | 'return') => {
-    // For departure journey in round trip, just save the selection
+    // Generate time details for the selected journey
+    const timeDetails = generateTimeDetails(index);
+    
+    // For departure journey in round trip, save the selection and details
     if (tripType === 'round-trip' && journeyType === 'departure') {
       setSelectedDeparture(`journey-${index}`);
+      setSelectedDepartureDetails({
+        date: departureParam,
+        time: timeDetails.departureTime,
+        from: fromParam,
+        to: toParam,
+        price: boats.length > 0 ? boats[0].price_per_hour : 0,
+        duration: 4 // Default duration in hours
+      });
       return;
     }
     
     // For one-way or return journey, proceed to checkout
-    const timeDetails = generateTimeDetails(index);
+    const currentDate = journeyType === 'return' ? returnParam : departureParam;
+    const currentPrice = (boats.length > 0 ? boats[0].price_per_hour : 0) * 4 + 800; // 4 hours + fees
     
-    // Create booking details to pass to checkout without boat name
+    // Create booking details
     const bookingDetails = {
-      boatId: boats.length > 0 ? boats[0].id : "", // Just use the first boat
-      boatName: "", // No longer showing boat name
-      boatImage: boats.length > 0 ? boats[0].images[0] : "",
-      date: journeyType === 'return' ? returnParam : departureParam,
-      time: timeDetails.departureTime,
-      duration: 4, // Default duration in hours
+      tripType: tripType,
+      departure: selectedDepartureDetails || {
+        date: departureParam,
+        time: timeDetails.departureTime,
+        from: fromParam,
+        to: toParam,
+        price: boats.length > 0 ? boats[0].price_per_hour : 0,
+        duration: 4 // Default duration in hours
+      },
+      return: journeyType === 'return' ? {
+        date: returnParam,
+        time: timeDetails.departureTime,
+        from: toParam,
+        to: fromParam,
+        price: boats.length > 0 ? boats[0].price_per_hour : 0,
+        duration: 4 // Default duration in hours
+      } : null,
+      totalPrice: tripType === 'round-trip' ? currentPrice * 2 : currentPrice,
       guestCount: totalPassengers,
-      price: boats.length > 0 ? boats[0].price_per_hour : 0,
-      totalPrice: (boats.length > 0 ? boats[0].price_per_hour : 0) * 4 + 800 // 4 hours + fees
+      boatId: boats.length > 0 ? boats[0].id : "",
+      boatImage: boats.length > 0 ? boats[0].images[0] : ""
     };
     
     navigate('/checkout', { state: bookingDetails });

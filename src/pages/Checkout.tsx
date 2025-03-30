@@ -11,6 +11,8 @@ import GuestDetailsForm from '@/components/checkout/GuestDetailsForm';
 import { useToast } from '@/components/ui/use-toast';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import Auth from './Auth';
+import { JourneyDetails } from '@/integrations/supabase/services';
+import { format } from 'date-fns';
 
 interface GuestDetail {
   name: string;
@@ -23,14 +25,12 @@ interface GuestDetail {
 
 interface BookingDetails {
   boatId: string;
-  boatName: string;
   boatImage: string;
-  date: string;
-  time: string;
-  duration: number;
   guestCount: number;
-  price: number;
   totalPrice: number;
+  tripType: string;
+  departure: JourneyDetails;
+  return?: JourneyDetails | null;
 }
 
 const Checkout = () => {
@@ -41,7 +41,8 @@ const Checkout = () => {
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
   const [guestDetails, setGuestDetails] = useState<GuestDetail[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [ticketId, setTicketId] = useState('');
+  const [departureTicketId, setDepartureTicketId] = useState('');
+  const [returnTicketId, setReturnTicketId] = useState('');
   const [guestPhotos, setGuestPhotos] = useState<string[]>([]);
 
   useEffect(() => {
@@ -134,32 +135,34 @@ const Checkout = () => {
     }
     
     try {
-      // Insert booking
-      const randomTicketId = 'SB-' + Math.floor(100000 + Math.random() * 900000);
-      const { data: bookingData, error: bookingError } = await supabase
+      // Create departure ticket ID
+      const departureRandomTicketId = 'SB-' + Math.floor(100000 + Math.random() * 900000);
+      
+      // Insert departure booking
+      const { data: departureBookingData, error: departureBookingError } = await supabase
         .from('bookings')
         .insert({
           user_id: user.id,
           boat_id: bookingDetails.boatId,
-          boat_name: "", // Don't store boat name
-          date: bookingDetails.date,
-          time: bookingDetails.time,
-          duration: bookingDetails.duration,
+          boat_name: "",
+          date: bookingDetails.departure.date,
+          time: bookingDetails.departure.time,
+          duration: bookingDetails.departure.duration,
           guest_count: bookingDetails.guestCount,
-          total_price: bookingDetails.totalPrice,
-          ticket_id: randomTicketId
+          total_price: bookingDetails.departure.price * bookingDetails.departure.duration + 800,
+          ticket_id: departureRandomTicketId
         })
         .select('id')
         .single();
 
-      if (bookingError) throw bookingError;
+      if (departureBookingError) throw departureBookingError;
 
       // Upload guest photos
-      const photoPaths = await uploadGuestPhotos(guestDetails, bookingData.id);
+      const photoPaths = await uploadGuestPhotos(guestDetails, departureBookingData.id);
 
-      // Insert guest details with photo paths
-      const guestInserts = guestDetails.map((guest, index) => ({
-        booking_id: bookingData.id,
+      // Insert guest details with photo paths for departure booking
+      const departureGuestInserts = guestDetails.map((guest, index) => ({
+        booking_id: departureBookingData.id,
         name: guest.name,
         age: guest.age,
         id_type: guest.idType,
@@ -167,13 +170,57 @@ const Checkout = () => {
         photo_path: photoPaths[index]
       }));
 
-      const { error: guestsError } = await supabase
+      const { error: departureGuestsError } = await supabase
         .from('booking_guests')
-        .insert(guestInserts);
+        .insert(departureGuestInserts);
 
-      if (guestsError) throw guestsError;
+      if (departureGuestsError) throw departureGuestsError;
 
-      setTicketId(randomTicketId);
+      setDepartureTicketId(departureRandomTicketId);
+
+      // Handle return booking if it's a round trip
+      if (bookingDetails.tripType === 'round-trip' && bookingDetails.return) {
+        // Create return ticket ID
+        const returnRandomTicketId = 'SB-' + Math.floor(100000 + Math.random() * 900000);
+        
+        // Insert return booking
+        const { data: returnBookingData, error: returnBookingError } = await supabase
+          .from('bookings')
+          .insert({
+            user_id: user.id,
+            boat_id: bookingDetails.boatId,
+            boat_name: "",
+            date: bookingDetails.return.date,
+            time: bookingDetails.return.time,
+            duration: bookingDetails.return.duration,
+            guest_count: bookingDetails.guestCount,
+            total_price: bookingDetails.return.price * bookingDetails.return.duration + 800,
+            ticket_id: returnRandomTicketId
+          })
+          .select('id')
+          .single();
+
+        if (returnBookingError) throw returnBookingError;
+
+        // Insert guest details with photo paths for return booking
+        const returnGuestInserts = guestDetails.map((guest, index) => ({
+          booking_id: returnBookingData.id,
+          name: guest.name,
+          age: guest.age,
+          id_type: guest.idType,
+          id_number: guest.idNumber,
+          photo_path: photoPaths[index]
+        }));
+
+        const { error: returnGuestsError } = await supabase
+          .from('booking_guests')
+          .insert(returnGuestInserts);
+
+        if (returnGuestsError) throw returnGuestsError;
+
+        setReturnTicketId(returnRandomTicketId);
+      }
+
       setIsCompleted(true);
       window.scrollTo(0, 0);
     } catch (error) {
@@ -245,37 +292,74 @@ const Checkout = () => {
                   <div className="bg-white rounded-xl shadow-sm p-6 sticky top-24">
                     <h2 className="text-xl font-semibold text-gray-900 mb-4">Journey Summary</h2>
                     
-                    <div className="space-y-3 mb-6">
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <Calendar className="h-4 w-4 text-ocean-600" />
-                        <span>{formatDate(bookingDetails?.date || '')}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <Clock className="h-4 w-4 text-ocean-600" />
-                        <span>{bookingDetails?.time} • {bookingDetails?.duration} {bookingDetails?.duration === 1 ? 'hour' : 'hours'}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <Users className="h-4 w-4 text-ocean-600" />
-                        <span>{bookingDetails?.guestCount} {bookingDetails?.guestCount === 1 ? 'guest' : 'guests'}</span>
-                      </div>
-                    </div>
+                    {bookingDetails && (
+                      <>
+                        {/* Departure Journey */}
+                        <div className="mb-4">
+                          <h3 className="font-medium text-gray-700">Departure Journey</h3>
+                          <div className="space-y-2 mt-2">
+                            <div className="flex items-center gap-2 text-gray-700">
+                              <Calendar className="h-4 w-4 text-ocean-600" />
+                              <span>{formatDate(bookingDetails.departure.date)}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-700">
+                              <Clock className="h-4 w-4 text-ocean-600" />
+                              <span>{bookingDetails.departure.time} • {bookingDetails.departure.duration} {bookingDetails.departure.duration === 1 ? 'hour' : 'hours'}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-700">
+                              <Users className="h-4 w-4 text-ocean-600" />
+                              <span>{bookingDetails.guestCount} {bookingDetails.guestCount === 1 ? 'guest' : 'guests'}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Return Journey if applicable */}
+                        {bookingDetails.tripType === 'round-trip' && bookingDetails.return && (
+                          <div className="mb-4 pt-3 border-t border-gray-100">
+                            <h3 className="font-medium text-gray-700">Return Journey</h3>
+                            <div className="space-y-2 mt-2">
+                              <div className="flex items-center gap-2 text-gray-700">
+                                <Calendar className="h-4 w-4 text-ocean-600" />
+                                <span>{formatDate(bookingDetails.return.date)}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-gray-700">
+                                <Clock className="h-4 w-4 text-ocean-600" />
+                                <span>{bookingDetails.return.time} • {bookingDetails.return.duration} {bookingDetails.return.duration === 1 ? 'hour' : 'hours'}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
                     
                     <div className="border-t border-gray-100 pt-4">
                       <div className="flex justify-between mb-2">
-                        <span className="text-gray-600">₹{bookingDetails?.price.toLocaleString('en-IN')} × {bookingDetails?.duration} hours</span>
-                        <span className="font-medium">₹{bookingDetails ? (bookingDetails.price * bookingDetails.duration).toLocaleString('en-IN') : ''}</span>
+                        <span className="text-gray-600">Departure journey</span>
+                        <span className="font-medium">
+                          ฿{bookingDetails ? (bookingDetails.departure.price * bookingDetails.departure.duration).toLocaleString('en-IN') : ''}
+                        </span>
                       </div>
+                      
+                      {bookingDetails?.tripType === 'round-trip' && bookingDetails.return && (
+                        <div className="flex justify-between mb-2">
+                          <span className="text-gray-600">Return journey</span>
+                          <span className="font-medium">
+                            ฿{(bookingDetails.return.price * bookingDetails.return.duration).toLocaleString('en-IN')}
+                          </span>
+                        </div>
+                      )}
+                      
                       <div className="flex justify-between mb-2">
                         <span className="text-gray-600">Cleaning fee</span>
-                        <span className="font-medium">₹500</span>
+                        <span className="font-medium">฿500</span>
                       </div>
                       <div className="flex justify-between mb-2">
                         <span className="text-gray-600">Service fee</span>
-                        <span className="font-medium">₹300</span>
+                        <span className="font-medium">฿300</span>
                       </div>
                       <div className="flex justify-between font-bold text-lg border-t border-gray-100 pt-3 mt-3">
                         <span>Total</span>
-                        <span>₹{bookingDetails?.totalPrice.toLocaleString('en-IN')}</span>
+                        <span>฿{bookingDetails?.totalPrice.toLocaleString('en-IN')}</span>
                       </div>
                     </div>
                   </div>
@@ -292,16 +376,81 @@ const Checkout = () => {
                 </div>
                 
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Booking Confirmed!</h2>
-                <p className="text-gray-600 mb-6">Your journey has been successfully booked.</p>
+                <p className="text-gray-600 mb-6">Your journey{bookingDetails?.tripType === 'round-trip' ? 's have' : ' has'} been successfully booked.</p>
                 
+                {/* Departure Journey Ticket */}
                 <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Journey Details</h3>
-                  <p className="text-gray-700 mb-1"><strong>Date:</strong> {bookingDetails ? formatDate(bookingDetails.date) : ''}</p>
-                  <p className="text-gray-700 mb-1"><strong>Time:</strong> {bookingDetails?.time}</p>
-                  <p className="text-gray-700 mb-1"><strong>Duration:</strong> {bookingDetails?.duration} {bookingDetails?.duration === 1 ? 'hour' : 'hours'}</p>
-                  <p className="text-gray-700 mb-1"><strong>Guests:</strong> {bookingDetails?.guestCount}</p>
-                  <p className="text-gray-700"><strong>Ticket ID:</strong> {ticketId}</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Departure Journey</h3>
+                  {bookingDetails?.departure && (
+                    <>
+                      <p className="text-gray-700 mb-1"><strong>From:</strong> {bookingDetails.departure.from}</p>
+                      <p className="text-gray-700 mb-1"><strong>To:</strong> {bookingDetails.departure.to}</p>
+                      <p className="text-gray-700 mb-1"><strong>Date:</strong> {formatDate(bookingDetails.departure.date)}</p>
+                      <p className="text-gray-700 mb-1"><strong>Time:</strong> {bookingDetails.departure.time}</p>
+                      <p className="text-gray-700 mb-1"><strong>Duration:</strong> {bookingDetails.departure.duration} {bookingDetails.departure.duration === 1 ? 'hour' : 'hours'}</p>
+                      <p className="text-gray-700 mb-1"><strong>Guests:</strong> {bookingDetails.guestCount}</p>
+                      <p className="text-gray-700"><strong>Ticket ID:</strong> {departureTicketId}</p>
+                    </>
+                  )}
+                  
+                  <div className="mt-3">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Departure QR Code</h4>
+                    <div className="flex justify-center">
+                      <QRCodeGenerator 
+                        value={JSON.stringify({
+                          ticketId: departureTicketId,
+                          type: 'departure',
+                          date: bookingDetails?.departure.date,
+                          time: bookingDetails?.departure.time,
+                          from: bookingDetails?.departure.from,
+                          to: bookingDetails?.departure.to,
+                          guestCount: bookingDetails?.guestCount,
+                          guests: guestDetails.map(g => ({
+                            name: g.name,
+                            age: g.age,
+                            idType: g.idType
+                          }))
+                        })}
+                      />
+                    </div>
+                  </div>
                 </div>
+                
+                {/* Return Journey Ticket - Only show if it's a round trip */}
+                {bookingDetails?.tripType === 'round-trip' && bookingDetails.return && (
+                  <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Return Journey</h3>
+                    <p className="text-gray-700 mb-1"><strong>From:</strong> {bookingDetails.return.from}</p>
+                    <p className="text-gray-700 mb-1"><strong>To:</strong> {bookingDetails.return.to}</p>
+                    <p className="text-gray-700 mb-1"><strong>Date:</strong> {formatDate(bookingDetails.return.date)}</p>
+                    <p className="text-gray-700 mb-1"><strong>Time:</strong> {bookingDetails.return.time}</p>
+                    <p className="text-gray-700 mb-1"><strong>Duration:</strong> {bookingDetails.return.duration} {bookingDetails.return.duration === 1 ? 'hour' : 'hours'}</p>
+                    <p className="text-gray-700 mb-1"><strong>Guests:</strong> {bookingDetails.guestCount}</p>
+                    <p className="text-gray-700"><strong>Ticket ID:</strong> {returnTicketId}</p>
+                    
+                    <div className="mt-3">
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Return QR Code</h4>
+                      <div className="flex justify-center">
+                        <QRCodeGenerator 
+                          value={JSON.stringify({
+                            ticketId: returnTicketId,
+                            type: 'return',
+                            date: bookingDetails.return.date,
+                            time: bookingDetails.return.time,
+                            from: bookingDetails.return.from,
+                            to: bookingDetails.return.to,
+                            guestCount: bookingDetails.guestCount,
+                            guests: guestDetails.map(g => ({
+                              name: g.name,
+                              age: g.age,
+                              idType: g.idType
+                            }))
+                          })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
                 
                 <div className="mb-6">
                   <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center justify-center gap-2">
@@ -332,31 +481,6 @@ const Checkout = () => {
                   </div>
                 </div>
                 
-                <div className="mb-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center justify-center gap-2">
-                    <QrCode className="h-5 w-5 text-ocean-600" />
-                    Your Ticket QR Code
-                  </h3>
-                  <div className="flex justify-center">
-                    <QRCodeGenerator 
-                      value={JSON.stringify({
-                        ticketId,
-                        date: bookingDetails?.date,
-                        time: bookingDetails?.time,
-                        guestCount: bookingDetails?.guestCount,
-                        guests: guestDetails.map(g => ({
-                          name: g.name,
-                          age: g.age,
-                          idType: g.idType
-                        }))
-                      })}
-                    />
-                  </div>
-                  <p className="text-sm text-gray-500 mt-3">
-                    Present this QR code when you arrive at the location.
-                  </p>
-                </div>
-                
                 <div className="flex flex-col gap-3">
                   <Button 
                     onClick={() => navigate('/')}
@@ -369,7 +493,7 @@ const Checkout = () => {
                     onClick={() => window.print()}
                     variant="outline"
                   >
-                    Print Ticket
+                    Print Tickets
                   </Button>
                 </div>
               </div>

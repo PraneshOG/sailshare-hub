@@ -38,6 +38,16 @@ export type BookingGuest = {
   created_at: string;
 }
 
+// New type for journey details
+export type JourneyDetails = {
+  date: string;
+  time: string;
+  from: string;
+  to: string;
+  price: number;
+  duration: number;
+}
+
 export async function fetchBoats() {
   const { data, error } = await supabase
     .from('boats')
