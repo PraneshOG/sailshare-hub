@@ -45,9 +45,9 @@ const SearchBar = () => {
   };
 
   const tierColors = {
-    low: "#12B981",
+    low: "#F8CB45",
     medium: "#F8CB45",
-    high: "#FF6B6B",
+    high: "#8A3FFC",
   };
 
   // Get unique price tiers used in the current month
@@ -113,14 +113,14 @@ const SearchBar = () => {
                       high: (date) => getPriceTiers(date) === "high"
                     }}
                     modifiersClassNames={{
-                      low: "bg-[#12B981]/20 border-0 text-black font-medium",
-                      medium: "bg-[#F8CB45]/20 border-0 text-black font-medium",
-                      high: "bg-[#FF6B6B]/20 border-0 text-black font-medium"
+                      low: "bg-[#F8CB45] text-black font-medium rounded-md",
+                      medium: "bg-[#F8CB45] text-black font-medium rounded-md",
+                      high: "bg-[#8A3FFC] text-white font-medium rounded-md"
                     }}
                     classNames={{
                       day_selected: "bg-ocean-600 text-white hover:bg-ocean-500 hover:text-white focus:bg-ocean-600 focus:text-white",
                       day_today: "font-bold border-2 border-ocean-600",
-                      day: "hover:bg-ocean-100 hover:text-ocean-800 text-sm aria-selected:opacity-100 w-10 h-10 p-0 flex items-center justify-center rounded-none",
+                      day: "rounded-md hover:bg-ocean-100 hover:text-ocean-800 text-sm aria-selected:opacity-100 w-10 h-10 p-0 flex items-center justify-center",
                       head_cell: "text-gray-600 font-medium text-center w-10",
                       caption: "text-lg font-medium py-2",
                       nav_button: "border border-gray-200 bg-white hover:bg-gray-50",
