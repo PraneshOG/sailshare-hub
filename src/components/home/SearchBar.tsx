@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 const SearchBar = () => {
   const navigate = useNavigate();
@@ -55,23 +56,43 @@ const SearchBar = () => {
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <CalendarComponent
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  initialFocus
-                  className="p-3 pointer-events-auto"
-                  classNames={{
-                    day_selected: "bg-ocean-600 text-white hover:bg-ocean-500 hover:text-white focus:bg-ocean-600 focus:text-white",
-                    day_today: "bg-ocean-100 text-ocean-800",
-                    day: "hover:bg-ocean-100 hover:text-ocean-800",
-                    head_cell: "text-ocean-600 font-semibold",
-                    caption: "text-ocean-800 font-medium",
-                    nav_button: "border border-ocean-200 bg-white hover:bg-ocean-50",
-                    table: "border-collapse space-y-1",
-                    cell: "p-0 relative [&:has([aria-selected])]:bg-ocean-50 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md",
-                  }}
-                />
+                <div>
+                  <CalendarComponent
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                    classNames={{
+                      day_selected: "bg-ocean-600 text-white hover:bg-ocean-500 hover:text-white focus:bg-ocean-600 focus:text-white",
+                      day_today: "bg-ocean-100 text-ocean-800",
+                      day: "hover:bg-ocean-100 hover:text-ocean-800",
+                      head_cell: "text-ocean-600 font-semibold",
+                      caption: "text-ocean-800 font-medium",
+                      nav_button: "border border-ocean-200 bg-white hover:bg-ocean-50",
+                      table: "border-collapse space-y-1",
+                      cell: "p-0 relative [&:has([aria-selected])]:bg-ocean-50 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md",
+                    }}
+                  />
+                  {/* Price Legend */}
+                  <div className="p-3 border-t border-gray-200">
+                    <p className="text-sm font-medium text-gray-700 mb-2">Price Legend:</p>
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center">
+                        <div className="w-4 h-4 rounded-full bg-[#F2FCE2] border border-[#C5E8A5] mr-1.5"></div>
+                        <span className="text-xs text-gray-600">Low</span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-4 h-4 rounded-full bg-[#FEF7CD] border border-[#F9E896] mr-1.5"></div>
+                        <span className="text-xs text-gray-600">Medium</span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-4 h-4 rounded-full bg-[#FEC6A1] border border-[#F9A06C] mr-1.5"></div>
+                        <span className="text-xs text-gray-600">High</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </PopoverContent>
             </Popover>
           </div>
