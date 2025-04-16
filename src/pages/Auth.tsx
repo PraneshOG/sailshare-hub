@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -12,6 +12,7 @@ const Auth = () => {
   const [isSignIn, setIsSignIn] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -22,6 +23,33 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        // Check if user is admin
+        const { data: adminData } = await supabase
+          .from('admin_users')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (adminData) {
+          // If user is admin, redirect to admin dashboard
+          navigate('/admin', { replace: true });
+        } else {
+          // If user is not admin, redirect to home
+          navigate(redirectTo, { replace: true });
+        }
+      }
+      
+      setCheckingAuth(false);
+    };
+    
+    checkAuth();
+  }, [navigate, redirectTo]);
   
   // Sign In with Email
   const handleAuth = async (e: React.FormEvent) => {
@@ -43,7 +71,20 @@ const Auth = () => {
           description: "You've successfully signed in.",
         });
         
-        navigate(redirectTo);
+        // Check if user is admin
+        const { data: adminData } = await supabase
+          .from('admin_users')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
+        
+        if (adminData) {
+          // If user is admin, redirect to admin dashboard
+          navigate('/admin', { replace: true });
+        } else {
+          // If user is not admin, redirect to home
+          navigate(redirectTo, { replace: true });
+        }
       } else {
         // Sign Up
         const { data, error } = await supabase.auth.signUp({
@@ -136,6 +177,14 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
+
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-ocean-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

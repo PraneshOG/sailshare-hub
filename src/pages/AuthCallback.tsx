@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,8 +21,24 @@ const AuthCallback = () => {
           return;
         }
         
-        // If we have a session, redirect to the home page
+        // If we have a session, check if user is admin
         if (data.session) {
+          const userId = data.session.user.id;
+          
+          // Check if user is admin
+          const { data: adminData } = await supabase
+            .from('admin_users')
+            .select('*')
+            .eq('id', userId)
+            .single();
+          
+          if (adminData) {
+            // If user is admin, redirect to admin dashboard
+            navigate('/admin', { replace: true });
+            return;
+          }
+          
+          // Otherwise, redirect to home page
           navigate('/', { replace: true });
           return;
         }
