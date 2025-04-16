@@ -3,10 +3,12 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, Ship } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -21,6 +23,23 @@ const Navbar = () => {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location]);
+
+  useEffect(() => {
+    checkAdmin();
+  }, []);
+
+  const checkAdmin = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const { data } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+      
+      setIsAdmin(!!data);
+    }
+  };
 
   return (
     <header 
@@ -39,6 +58,18 @@ const Navbar = () => {
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-4">
+          {isAdmin && (
+            <Link to="/admin">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="rounded-full bg-white/20 hover:bg-white/30 border-none transition-all duration-300 text-white
+                          hover:text-white hover:scale-105 hover:shadow-lg backdrop-blur-sm"
+              >
+                Dashboard
+              </Button>
+            </Link>
+          )}
           <Link to="/auth">
             <Button 
               variant="outline" 
@@ -70,6 +101,17 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-indigo-900 border-t border-indigo-800 animate-fade-in-up">
           <div className="container mx-auto py-4 px-4 flex flex-col gap-4">
+            {isAdmin && (
+              <Link to="/admin" className="w-full">
+                <Button 
+                  variant="outline"
+                  className="w-full rounded-full bg-white/20 hover:bg-white/30 border-none text-white 
+                           hover:scale-105 hover:shadow-md backdrop-blur-sm transition-all duration-300"
+                >
+                  Dashboard
+                </Button>
+              </Link>
+            )}
             <div className="flex items-center justify-between pt-2 gap-4">
               <Link to="/auth" className="w-full">
                 <Button 
