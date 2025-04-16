@@ -1,15 +1,19 @@
 
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, Ship } from 'lucide-react';
+import { Menu, X, User, Ship, LogOut } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,19 +29,60 @@ const Navbar = () => {
   }, [location]);
 
   useEffect(() => {
-    checkAdmin();
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setIsAuthenticated(!!session);
+        setUserEmail(session?.user?.email || '');
+        if (session) {
+          checkAdmin(session.user.id);
+        } else {
+          setIsAdmin(false);
+        }
+      }
+    );
+
+    // Initial auth check
+    const checkInitialAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+      if (session) {
+        setUserEmail(session.user.email || '');
+        checkAdmin(session.user.id);
+      }
+    };
+    
+    checkInitialAuth();
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const checkAdmin = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      const { data } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-      
-      setIsAdmin(!!data);
+  const checkAdmin = async (userId) => {
+    const { data } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    
+    setIsAdmin(!!data);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out of your account.",
+      });
+      navigate('/');
+    } catch (error) {
+      toast({
+        title: "Error signing out",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
     }
   };
 
@@ -70,17 +115,34 @@ const Navbar = () => {
               </Button>
             </Link>
           )}
-          <Link to="/auth">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="rounded-full bg-white/20 hover:bg-white/30 border-none transition-all duration-300 text-white
-                        hover:text-white hover:scale-105 hover:shadow-lg backdrop-blur-sm"
-            >
-              <User className="h-4 w-4 mr-2" />
-              Sign in
-            </Button>
-          </Link>
+          
+          {isAuthenticated ? (
+            <div className="flex items-center gap-3">
+              <span className="text-white text-sm">{userEmail}</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleSignOut}
+                className="rounded-full bg-white/20 hover:bg-white/30 border-none transition-all duration-300 text-white
+                          hover:text-white hover:scale-105 hover:shadow-lg backdrop-blur-sm"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign out
+              </Button>
+            </div>
+          ) : (
+            <Link to="/auth">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="rounded-full bg-white/20 hover:bg-white/30 border-none transition-all duration-300 text-white
+                          hover:text-white hover:scale-105 hover:shadow-lg backdrop-blur-sm"
+              >
+                <User className="h-4 w-4 mr-2" />
+                Sign in
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -113,16 +175,31 @@ const Navbar = () => {
               </Link>
             )}
             <div className="flex items-center justify-between pt-2 gap-4">
-              <Link to="/auth" className="w-full">
-                <Button 
-                  variant="outline"
-                  className="w-full rounded-full bg-white/20 hover:bg-white/30 border-none text-white 
-                           hover:scale-105 hover:shadow-md backdrop-blur-sm transition-all duration-300"
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  Sign in
-                </Button>
-              </Link>
+              {isAuthenticated ? (
+                <div className="w-full flex flex-col gap-2">
+                  <span className="text-white text-sm">{userEmail}</span>
+                  <Button 
+                    variant="outline"
+                    onClick={handleSignOut}
+                    className="w-full rounded-full bg-white/20 hover:bg-white/30 border-none text-white 
+                             hover:scale-105 hover:shadow-md backdrop-blur-sm transition-all duration-300"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign out
+                  </Button>
+                </div>
+              ) : (
+                <Link to="/auth" className="w-full">
+                  <Button 
+                    variant="outline"
+                    className="w-full rounded-full bg-white/20 hover:bg-white/30 border-none text-white 
+                             hover:scale-105 hover:shadow-md backdrop-blur-sm transition-all duration-300"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Sign in
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>
